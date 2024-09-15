@@ -25,9 +25,9 @@ void setup()
 void loop() 
 {
 
-    motorA.write(1900);
-    motorB.write(1100);
-    delay(1000);
+    // motorA.write(1900);
+    // motorB.write(1100);
+    // delay(1000);
     motorA.write(1100);
     motorB.write(1900);
     delay(1000);

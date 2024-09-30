@@ -123,6 +123,7 @@ void setup() {
   ultrasonic_setup();
   tof_setup();
   //IMU_setup();
+  //colour_setup();
   pick_up_setup();
   delay(10);
   motor_setup();

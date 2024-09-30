@@ -15,6 +15,7 @@ double DEG_2_RAD = 0.01745329251; //trig functions require radians, BNO055 outpu
   Adafruit_BNO055 bno = Adafruit_BNO055(55, 0x28, &Wire1);
 
 
+
 void IMU_setup(void)
 {
   Serial.println("Orientation Sensor Test"); Serial.println("");
@@ -71,24 +72,32 @@ void IMU_read(void)
   // Serial.print(accel);
   // Serial.print(" Mag=");
   // Serial.println(mag);
+  Serial.print("Heading: ");
+  Serial.println(orientationData.orientation.x);
+  // Serial.print("Position: ");
+  // Serial.print(xPos);
+  // Serial.print(" , ");
+  // Serial.println(yPos);
+  // Serial.print("Speed: ");
+  // Serial.println(headingVel);
+  // Serial.println("-------");
+  // if (printCount * BNO055_SAMPLERATE_DELAY_MS >= PRINT_DELAY_MS) {
+  //   //enough iterations have passed that we can print the latest data
+  //   Serial.print("Heading: ");
+  //   Serial.println(orientationData.orientation.x);
+  //   Serial.print("Position: ");
+  //   Serial.print(xPos);
+  //   Serial.print(" , ");
+  //   Serial.println(yPos);
+  //   Serial.print("Speed: ");
+  //   Serial.println(headingVel);
+  //   Serial.println("-------");
 
-  if (printCount * BNO055_SAMPLERATE_DELAY_MS >= PRINT_DELAY_MS) {
-    //enough iterations have passed that we can print the latest data
-    Serial.print("Heading: ");
-    Serial.println(orientationData.orientation.x);
-    Serial.print("Position: ");
-    Serial.print(xPos);
-    Serial.print(" , ");
-    Serial.println(yPos);
-    Serial.print("Speed: ");
-    Serial.println(headingVel);
-    Serial.println("-------");
-
-    printCount = 0;
-  }
-  else {
-    printCount = printCount + 1;
-  }
+  //   printCount = 0;
+  // }
+  // else {
+  //   printCount = printCount + 1;
+  // }
 
   // while ((micros() - tStart) < (BNO055_SAMPLERATE_DELAY_MS * 1000))
   // {
@@ -157,3 +166,5 @@ void printEvent(sensors_event_t* event) {
   Serial.print(" |\tz= ");
   Serial.println(z);
 }
+
+

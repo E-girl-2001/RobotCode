@@ -11,6 +11,8 @@
 
 void colour_setup();
 void colour_read();
+void calibrateHomeBase();
+void check_base();
 
 // Return to home base
 void return_to_base();

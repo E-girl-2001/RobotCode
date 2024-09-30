@@ -12,9 +12,8 @@
 #include <Wire.h>
 #include <SparkFunSX1509.h>
 
-#define side_distance 12
+#define side_distance 14
 #define front_distance 14
-
 
 //#define 
 const int AtrigPin = 3;
@@ -24,8 +23,8 @@ const int BtrigPin = 5;
 const int BechoPin = 4;
 
 const byte SX1509_AIO5 = 5;
-const uint8_t xshutPinsL0[8] = {0,1,2,3,4,5,6,7};
-const uint8_t xshutPinsL1[8] = {2,3,4,5,6,7};
+const uint8_t xshutPinsL0[8] = {0,1};
+const uint8_t xshutPinsL1[8] = {3,4};
 const uint8_t sensorCount = 2; 
 
 uint8_t x_ROI = 16;
@@ -55,11 +54,10 @@ void tof_setup()
     Serial.println("Failed to communicate.");
     while (1) ;
   }
-
   Wire.begin();
-  Wire.setClock(400000); // use 400 kHz I2C
+  Wire.setClock(400000);
 
-  // ----------- Setup the TOF sensors ------------
+  // ---------- Disable/reset all sensors by driving their XSHUT pins low. ---------
   for (uint8_t i = 0; i < sensorCount; i++)
   {
     io.pinMode(xshutPinsL0[i], OUTPUT);
@@ -68,8 +66,7 @@ void tof_setup()
     io.digitalWrite(xshutPinsL1[i], LOW);
   }
 
-
-  // ----- Initialize SHORT range TOF sensors -----
+  // --------- L0 Enable, initialize, and start each sensor, one by one. ---------
   for (uint8_t i = 0; i < sensorCount; i++)
   {
     io.digitalWrite(xshutPinsL0[i], HIGH);
@@ -82,17 +79,17 @@ void tof_setup()
       Serial.println(i);
       while (1);
     }
+
     sensorsL0[i].setAddress(VL53L0X_ADDRESS_START + i);
 
     sensorsL0[i].startContinuous(50);
   }
 
-  // ----- Initialize LONG range TOF sensors -----
+    // ---------- L1 Enable, initialize, and start each sensor, one by one. ----------
   for (uint8_t i = 0; i < sensorCount; i++)
   {
     io.digitalWrite(xshutPinsL1[i], HIGH);
     delay(10);
-
     sensorsL1[i].setTimeout(500);
     if (!sensorsL1[i].init())
     {
@@ -107,6 +104,7 @@ void tof_setup()
     sensorsL1[i].setROICenter(199);
     delay(10);
   }
+  
   Serial.print("Tof setup\n");
 }
 
@@ -114,7 +112,17 @@ void pick_up_setup()
 {
   pinMode(inductor_pin, INPUT); //inductor sensor setup
   pinMode(magnet_pin, OUTPUT); //electromagnet setup
+  // io.pinMode(SX1509_AIO5, INPUT); //limit_switch setup
+  
+  // if (!io.begin(SX1509_ADDRESS))
+  // {
+  //   Serial.println("Failed to communicate.");
+  //   while (1) ;
+  // }
 }
+
+//READ
+//***********************************************************************
 
 long microsecondsToCentimeters(long microseconds)
 {
@@ -124,25 +132,35 @@ long microsecondsToCentimeters(long microseconds)
 // Read ultrasonic value
 void ultrasonic_read(void)
 {
-  long durationA, durationB, Acm, Bcm;
+  long durationA,durationB, Acm,Bcm;
+
   digitalWrite(AtrigPin, LOW);
   delayMicroseconds(2);
   digitalWrite(AtrigPin, HIGH);
-  delayMicroseconds(10);
+  delayMicroseconds(5);
   digitalWrite(AtrigPin, LOW);
- 
+
   durationA = pulseIn(AechoPin, HIGH);
   digitalWrite(BtrigPin, LOW);
   delayMicroseconds(2);
   digitalWrite(BtrigPin, HIGH);
-  delayMicroseconds(10);
+  delayMicroseconds(5);
   digitalWrite(BtrigPin, LOW);
   durationB = pulseIn(BechoPin, HIGH);
-
+  // convert the time into a distance
   Acm = microsecondsToCentimeters(durationA);
   Bcm = microsecondsToCentimeters(durationB);
-  *L_sonic = Acm;
-  *R_sonic = Bcm;
+
+  Serial.print(Acm);
+  Serial.print(", ");
+  Serial.print(Bcm);
+  // Serial.print(Acm);
+  // Serial.print(" ");
+  // Serial.print(Bcm);
+  // Serial.println();
+  L_sonic = int(Acm);
+  R_sonic = int(Bcm);
+
 }
 
 void tof_read(void)
@@ -151,38 +169,71 @@ void tof_read(void)
   long short2 = sensorsL0[1].readRangeContinuousMillimeters(); //short 2
   long high = sensorsL1[1].readRangeContinuousMillimeters(); //left
   long low = sensorsL1[0].readRangeContinuousMillimeters(); //right
-  *L_tof = (high);
-  *H_tof = (low);
-  *S1_tof = (short1);
-  *S2_tof = (short2);
-  
-  Serial.print("High, Low, Short1, Short2 \n");
   Serial.print("\n");
-  Serial.print(*L_tof);
+  // Conversion to cm
+  H_tof = (high / 10);
+  L_tof = (low / 10);
+  S1_tof = (short1 / 10);
+  S2_tof = (short2 / 10);
+  // Print values
+  Serial.print(H_tof);
   Serial.print(", ");
-  Serial.print(*H_tof);
+  Serial.print(L_tof);
   Serial.print(", ");
-  Serial.print(*S1_tof);
+  Serial.print(S1_tof);
   Serial.print(", ");
-  Serial.print(*S2_tof);
-
+  Serial.print(S2_tof);
+  
 }
 
+bool read_limit()
+{
+  bool limit = io.digitalRead(SX1509_AIO5);
+  return limit;
+}
 bool read_inductive()
 {
   bool inductive = digitalRead(inductor_pin);
   return inductive;
 }
+
+//STATES
 //***********************************************************************
 
-bool check_tof_for_weights(int16_t *H_tof, int16_t *L_tof)
+void update_flags()
 {
-  if (*H_tof < (*L_tof + 20))
-  {
-    return true;
+  if((L_sonic < side_distance) && (!R_flag)) {
+    L_flag = 1;
+  } else if (L_sonic > 8) {
+    L_flag = 0;
   }
-  else
-  {
-    return false;
+
+  if((R_sonic < side_distance) && (!L_flag)) {
+    R_flag = 1;
+  } else if (R_sonic > 8) {
+    R_flag = 0;
+  }
+
+  if(H_tof < front_distance) {
+    if (L_sonic < R_sonic) {
+      BL_flag = 1;
+    } else {
+      BR_flag = 1;
+    }
+  } else if(H_tof > 12) {
+    BR_flag = 0;
+    BL_flag = 0;
+  }
+
+  if(S1_tof > L_tof && S1_tof > S2_tof) {
+    HR_flag = 1;
+  } else {
+    HR_flag = 0;
+  }
+
+  if(S2_tof > L_tof && S2_tof > S1_tof) {
+    HL_flag = 1;
+  } else {
+    HL_flag = 0;
   }
 }

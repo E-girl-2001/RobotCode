@@ -44,6 +44,11 @@ void set_servo_bay(int control_servoB) {
   servoB.write(control_servoB);
 }
 
+void idle_drive(){
+  controlA = MOTOR_STOP;
+  controlB = MOTOR_STOP;
+}
+
 void search_drive(){
     if (BR_flag) { // reverse right
         Serial.print("REV RIGHT\n");

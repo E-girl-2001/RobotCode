@@ -28,6 +28,7 @@ void update_state() {
     case IDLE:
         // Handle the IDLE state
         activate_idle();
+        idle_drive();
         break;
 
 
@@ -64,8 +65,8 @@ void update_state() {
 
 
     case COLLECT:
-        weight_collect();
         collect_drive();
+        weight_collect();
         if (weight_counter == 3) {
           currentState = HOMING;
         } else {

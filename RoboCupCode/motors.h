@@ -29,6 +29,7 @@ void motor_setup();
 void set_motor();
 void set_servo_mag(int control_servoA);
 void set_servo_bay(int control_servoB);
+void idle_drive();
 void search_drive();
 void hunt_drive();
 void scan_drive();

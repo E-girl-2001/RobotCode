@@ -15,9 +15,8 @@
 const int inductor_pin = 21;
 const int magnet_pin = 24;
 
-
-
-extern int L_sonic, R_sonic, H_tof, L_tof, S1_tof, S2_tof;
+extern long shortLeft, shortRight, shortHighLeft, shortHighRight, shortLowLeft, shortLowRight, longHigh, longLow;
+extern int L_sonic, R_sonic;
 extern bool HR_flag, HL_flag, BL_flag, BR_flag, R_flag, L_flag;
 
 void ultrasonic_setup();
@@ -36,6 +35,10 @@ void update_flags();
 bool read_limit();
 
 bool read_inductive();
+
+void print_tof();
+
+void print_ultrasonic();
 
 //void read_limit_switch();
 

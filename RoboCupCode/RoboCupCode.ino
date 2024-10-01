@@ -89,7 +89,8 @@ bool debounce = 0;
 #define BAUD_RATE 276000
 
 // Global variables used in sensors and motors
-int L_sonic, R_sonic, H_tof, L_tof, S1_tof, S2_tof;
+long shortLeft, shortRight, shortHighLeft, shortHighRight, shortLowLeft, shortLowRight, longHigh, longLow;
+int L_sonic, R_sonic;
 bool R_flag, L_flag, HR_flag, HL_flag, BL_flag, BR_flag;
 
 //**********************************************************************************

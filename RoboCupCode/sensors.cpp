@@ -23,16 +23,18 @@ const int BtrigPin = 5;
 const int BechoPin = 4;
 
 const byte SX1509_AIO5 = 5;
-const uint8_t xshutPinsL0[8] = {0,1};
-const uint8_t xshutPinsL1[8] = {3,4};
-const uint8_t sensorCount = 2; 
+const uint8_t xshutPinsL1[8] = {0,1};
+const uint8_t xshutPinsL0[8] = {2,3,4,5,6,7};
+const uint8_t longSensorCount = 2; 
+const uint8_t shortSensorCount = 6;
 
 uint8_t x_ROI = 16;
 uint8_t y_ROI = 4;
 
 SX1509 io; // Create an SX1509 object to be used throughout
-VL53L0X sensorsL0[sensorCount];
-VL53L1X sensorsL1[sensorCount];
+VL53L0X sensorsL0[shortSensorCount];
+VL53L1X sensorsL1[longSensorCount];
+
 
 //SETUP
 //***********************************************************************
@@ -58,16 +60,19 @@ void tof_setup()
   Wire.setClock(400000);
 
   // ---------- Disable/reset all sensors by driving their XSHUT pins low. ---------
-  for (uint8_t i = 0; i < sensorCount; i++)
+  for (uint8_t i = 0; i < longSensorCount; i++)
   {
-    io.pinMode(xshutPinsL0[i], OUTPUT);
-    io.digitalWrite(xshutPinsL0[i], LOW);
     io.pinMode(xshutPinsL1[i], OUTPUT);
     io.digitalWrite(xshutPinsL1[i], LOW);
   }
+  for (uint8_t i = 0; i < shortSensorCount; i++)
+  {
+    io.pinMode(xshutPinsL0[i], OUTPUT);
+    io.digitalWrite(xshutPinsL0[i], LOW);
+  }
 
   // --------- L0 Enable, initialize, and start each sensor, one by one. ---------
-  for (uint8_t i = 0; i < sensorCount; i++)
+  for (uint8_t i = 0; i < shortSensorCount; i++)
   {
     io.digitalWrite(xshutPinsL0[i], HIGH);
     delay(10);
@@ -79,14 +84,12 @@ void tof_setup()
       Serial.println(i);
       while (1);
     }
-
     sensorsL0[i].setAddress(VL53L0X_ADDRESS_START + i);
-
     sensorsL0[i].startContinuous(50);
   }
 
     // ---------- L1 Enable, initialize, and start each sensor, one by one. ----------
-  for (uint8_t i = 0; i < sensorCount; i++)
+  for (uint8_t i = 0; i < longSensorCount; i++)
   {
     io.digitalWrite(xshutPinsL1[i], HIGH);
     delay(10);
@@ -97,6 +100,7 @@ void tof_setup()
       Serial.println(i);
       while (1);
     }
+    // Set both long range sensors to be filtered with SPADs
     sensorsL1[i].setAddress(VL53L1X_ADDRESS_START + i);
     sensorsL1[i].startContinuous(50);
     sensorsL1[i].setROISize(x_ROI, y_ROI);
@@ -113,7 +117,6 @@ void pick_up_setup()
   pinMode(inductor_pin, INPUT); //inductor sensor setup
   pinMode(magnet_pin, OUTPUT); //electromagnet setup
   // io.pinMode(SX1509_AIO5, INPUT); //limit_switch setup
-  
   // if (!io.begin(SX1509_ADDRESS))
   // {
   //   Serial.println("Failed to communicate.");
@@ -134,56 +137,74 @@ void ultrasonic_read(void)
 {
   long durationA,durationB, Acm,Bcm;
 
+  // Left sensor
   digitalWrite(AtrigPin, LOW);
   delayMicroseconds(2);
   digitalWrite(AtrigPin, HIGH);
   delayMicroseconds(5);
   digitalWrite(AtrigPin, LOW);
-
   durationA = pulseIn(AechoPin, HIGH);
+
+  // Right sensor
   digitalWrite(BtrigPin, LOW);
   delayMicroseconds(2);
   digitalWrite(BtrigPin, HIGH);
   delayMicroseconds(5);
   digitalWrite(BtrigPin, LOW);
   durationB = pulseIn(BechoPin, HIGH);
+
   // convert the time into a distance
   Acm = microsecondsToCentimeters(durationA);
   Bcm = microsecondsToCentimeters(durationB);
-
-  Serial.print(Acm);
-  Serial.print(", ");
-  Serial.print(Bcm);
-  // Serial.print(Acm);
-  // Serial.print(" ");
-  // Serial.print(Bcm);
-  // Serial.println();
   L_sonic = int(Acm);
   R_sonic = int(Bcm);
 
 }
 
+void print_ultrasonic()
+{
+  Serial.print("L_sonic: ");
+  Serial.print(L_sonic);
+  Serial.print(" R_sonic: ");
+  Serial.print(R_sonic);
+  Serial.print("\n");
+}
+
 void tof_read(void)
 {
-  long short1 = sensorsL0[0].readRangeContinuousMillimeters(); //short 1
-  long short2 = sensorsL0[1].readRangeContinuousMillimeters(); //short 2
-  long high = sensorsL1[1].readRangeContinuousMillimeters(); //left
-  long low = sensorsL1[0].readRangeContinuousMillimeters(); //right
+  longHigh = sensorsL1[1].readRangeContinuousMillimeters(); //left
+  longLow = sensorsL1[0].readRangeContinuousMillimeters(); //right
+  shortLeft = sensorsL0[2].readRangeContinuousMillimeters(); //short 1
+  shortRight = sensorsL0[3].readRangeContinuousMillimeters(); //short 2
+  shortHighLeft = sensorsL0[4].readRangeContinuousMillimeters(); //short 3
+  shortHighRight = sensorsL0[5].readRangeContinuousMillimeters(); //short 4
+  shortLowLeft = sensorsL0[6].readRangeContinuousMillimeters(); //short 5
+  shortLowRight = sensorsL0[7].readRangeContinuousMillimeters(); //short 6
   Serial.print("\n");
-  // Conversion to cm
-  H_tof = (high / 10);
-  L_tof = (low / 10);
-  S1_tof = (short1 / 10);
-  S2_tof = (short2 / 10);
-  // Print values
-  Serial.print(H_tof);
-  Serial.print(", ");
-  Serial.print(L_tof);
-  Serial.print(", ");
-  Serial.print(S1_tof);
-  Serial.print(", ");
-  Serial.print(S2_tof);
+  print_tof();
   
+}
+
+void print_tof()
+{
+  // Note: left and right are from the robot perspective
+  Serial.print("shortLeft,\tshortRight,\tshortHighLeft,\tshortHighRight,\tshortLowLeft,\tshortLowRight,\tlongHigh,\tlongLow\n");
+  Serial.print(shortLeft);
+  Serial.print(",\t");
+  Serial.print(shortRight);
+  Serial.print(",\t");
+  Serial.print(shortHighLeft);
+  Serial.print(",\t");
+  Serial.print(shortHighRight);
+  Serial.print(",\t");
+  Serial.print(shortLowLeft);
+  Serial.print(",\t");
+  Serial.print(shortLowRight);
+  Serial.print(",\t");
+  Serial.print(longHigh);
+  Serial.print(",\t");
+  Serial.print(longLow);
+  Serial.print("\n");
 }
 
 bool read_limit()

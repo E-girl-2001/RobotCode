@@ -35,6 +35,7 @@ void update_state() {
     case SEARCH:
         scan_freq_timer();
         search_drive();
+        Serial.print("Searching\n");
         if (detected) {
           currentState = HUNT;
         } else if (scan_freq_time == 0) {
@@ -45,6 +46,7 @@ void update_state() {
 
     case HUNT:
         hunt_drive();
+        Serial.print("Hunting\n");
         // Cancel out of HUNT after set period or if weight is detected
         if (detected) {
           currentState = COLLECT;
@@ -67,6 +69,7 @@ void update_state() {
     case COLLECT:
         collect_drive();
         weight_collect();
+        Serial.print("Collecting\n");
         if (weight_counter == 3) {
           currentState = HOMING;
         } else {
@@ -78,12 +81,22 @@ void update_state() {
     case HOMING:
         // Handle the HOMING state
         homing_drive();
-
-
+        Serial.print("Homing\n");
+        // Unload weights only if we are back at home base after having left
+        if (isOnHomeBase && leftHomeBase) {
+          leftHomeBase = false;  // Reset flag since we've just unloaded
+          currentState = DROPPING;
+        } 
         break;
+
     case DROPPING:
         // Handle the DROPPING state
+        Serial.print("Dropping\n");
         dropping();
+        if (released_the_massive_load){
+          released_the_massive_load = false;
+          currentState = SEARCH;
+        }
         break;
 
 

@@ -111,6 +111,7 @@ Task tUpdate_state(UPDATE_STATE_PERIOD,       UPDATE_STATE_TASK_NUM_PERIOD,    &
 // Tasks to scan for weights and collection upon detection
 Task tWeight_scan(WEIGHT_SCAN_TASK_PERIOD,       WEIGHT_SCAN_TASK_NUM_EXECUTE,    &weight_scan);
 Task tCollect_weight(COLLECT_WEIGHT_TASK_PERIOD, COLLECT_WEIGHT_TASK_NUM_EXECUTE, &weight_collect);
+Task tDetect_base(DETECT_BASE_TASK_PERIOD, DETECT_BASE_TASK_NUM_EXECUTE, &detect_base);
 Scheduler taskManager;
 
 // ---------- Function Definitions -----------
@@ -123,7 +124,7 @@ void setup() {
   ultrasonic_setup();
   tof_setup();
   //IMU_setup();
-  //colour_setup();
+  colour_setup();
   pick_up_setup();
   delay(10);
   motor_setup();
@@ -157,17 +158,19 @@ void task_init() {
   taskManager.addTask(tSet_motor); 
   taskManager.addTask(tWeight_scan);
   taskManager.addTask(tCollect_weight);
+  taskManager.addTask(tDetect_base);
   //taskManager.addTask(tRead_colour);
   //taskManager.addTask(tSensor_average);
 
   // ---------- Enable the tasks ----------
   tRead_ultrasonic.enable();
   tRead_tof.enable();
-  tRead_IMU.enable();
+  //tRead_IMU.enable();
   tUpdate_flags.enable();
   tUpdate_state.enable();
   tSet_motor.enable();
   tWeight_scan.enable();
+  tDetect_base.enable();
   //tRead_colour.enable();
   //tSensor_average.enable();
   Serial.println("Tasks have been initialised \n");

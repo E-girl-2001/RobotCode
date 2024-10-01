@@ -6,7 +6,7 @@
 #include "statemachine.h"
 
 
-Servo motorA, motorB;      // create servo object to control a servo
+Servo motorA, motorB, motorG;      // create servo object to control a servo
 Servo servoA, servoB;      // create servo object to control a servo
 
 #define MOTOR_FULL_FWD 1900
@@ -17,14 +17,17 @@ Servo servoA, servoB;      // create servo object to control a servo
 
 int controlA = MOTOR_STOP; // control signal for motor A
 int controlB = MOTOR_STOP; // control signal for motor B
+int controlG = MOTOR_STOP;
 int control_servoA = ServoA_start;
 int control_DropMotor = 0;
+bool released_the_massive_load = false;
 
 
 void motor_setup()
 {
   motorA.attach(LEFT_MOTOR_ADDRESS);
   motorB.attach(RIGHT_MOTOR_ADDRESS);
+  motorG.attach(GATE_MOTOR_ADDRESS);
   servoA.attach(1);
   servoA.write(ServoA_start);
   Serial.print("Motor Setup");
@@ -34,6 +37,7 @@ void motor_setup()
 void set_motor() {
   motorA.write(controlA);
   motorB.write(controlB);
+  motorG.write(controlG);
 }
 
 void set_servo_mag(int control_servoA) {
@@ -104,11 +108,39 @@ void collect_drive() {
 
 
 void homing_drive() {
-    // Handle the HOMING state
+    const int targetDistance = 20;  // Desired distance from the wall in cm
+    const int tolerance = 2;  // Acceptable error tolerance in cm
+    const int correctionSpeed = 1600;  // Speed to correct direction
+
+    // If the left sensor detects a wall closer than the target distance
+    if (L_sonic < targetDistance - tolerance) {
+        // Turn slightly right
+        Serial.println("Adjusting Right - Too close to Left Wall");
+        controlA = MOTOR_SLOW_FWD;   // Left motor moves forward slower
+        controlB = MOTOR_FULL_FWD;   // Right motor moves forward at full speed
+
+    // If the right sensor detects a wall closer than the target distance
+    } else if (R_sonic < targetDistance - tolerance) {
+        // Turn slightly left
+        Serial.println("Adjusting Left - Too close to Right Wall");
+        controlA = MOTOR_FULL_FWD;   // Left motor moves forward at full speed
+        controlB = MOTOR_SLOW_FWD;   // Right motor moves forward slower
+
+    // If both sensors are detecting similar distances (robot is aligned)
+    } else {
+        // Move forward
+        Serial.println("Moving Forward - Aligned");
+        controlA = MOTOR_FULL_FWD;
+        controlB = MOTOR_FULL_FWD;
+    }
 }
+
 
 
 void dropping() {
     // Handle the DROPPING state
-
+  controlA = MOTOR_STOP;
+  controlB = MOTOR_STOP;
+  controlG = 1; //Some abritrary value to open the gate and then close the gate 
+  released_the_massive_load = true;
 }

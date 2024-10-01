@@ -33,6 +33,7 @@ bool homeBaseIsGreen = false;
 bool homeBaseIsBlue = false;
 bool homeBaseDetected = false;
 bool leftHomeBase = false;
+bool isOnHomeBase= true;
 
 // Function to check if sensor is detecting a blue area
 bool isBlue(int clear, int red, int green, int blue) {
@@ -66,7 +67,7 @@ void colour_setup()
     while (1); // halt further execution
   }
   // Initial Calibration Phase to detect home base
-  // calibrateHomeBase();
+  calibrateHomeBase();
 }
 
 void colour_read() 
@@ -123,7 +124,7 @@ void calibrateHomeBase() {
 }
 
 // Function to check base periodically (this replaces loop)
-void check_base() {
+void detect_base() {
   uint16_t clear, red, green, blue;
 
   tcs.setInterrupt(false);      // turn on LED
@@ -132,42 +133,31 @@ void check_base() {
   tcs.setInterrupt(true);  // turn off LED
 
   // Print current color readings
-  Serial.print("Clear: "); Serial.print(clear);
-  Serial.print("\tRed: "); Serial.print(red);
-  Serial.print("\tGreen: "); Serial.print(green);
-  Serial.print("\tBlue: "); Serial.println(blue);
+  // Serial.print("Clear: "); Serial.print(clear);
+  // Serial.print("\tRed: "); Serial.print(red);
+  // Serial.print("\tGreen: "); Serial.print(green);
+  // Serial.print("\tBlue: "); Serial.println(blue);
 
   // Check if we're over the home base (either green or blue)
-  bool isOnHomeBase = (homeBaseIsGreen && isGreen(clear, red, green, blue)) ||
+  isOnHomeBase = (homeBaseIsGreen && isGreen(clear, red, green, blue)) ||
                       (homeBaseIsBlue && isBlue(clear, red, green, blue));
 
-  // Unload weights only if we are back at home base after having left
-  if (isOnHomeBase && leftHomeBase) {
-    Serial.println("Home base detected after leaving! Triggering action.");
-    unload_weights();  // Only unload weights after leaving and returning
-    leftHomeBase = false;  // Reset flag since we've just unloaded
-  } 
-  else if (!isOnHomeBase && !isBlack(clear, red, green, blue)) {
+  if (!isOnHomeBase && isBlack(clear, red, green, blue)) {
     // If we leave the home base (but not on black floor), set the flag
     leftHomeBase = true;
     Serial.println("Left the home base.");
   } 
-  else if (isBlack(clear, red, green, blue)) {
-    Serial.println("Black floor detected. No action taken.");
-  } 
-  else {
-    Serial.println("No base detected.");
-  }
+  // else if (isBlack(clear, red, green, blue)) {
+  //   Serial.println("Black floor detected. No action taken.");
+  // } 
+  // else {
+  //   Serial.println("No base detected.");
+  // }
 }
 
 // Return to home base
 void return_to_base(/* Parameters */){
   Serial.println("Returning to base \n");
-}
-
-// Detect what base (if any) the robot is above
-void detect_base(/* Parameters */){
-  Serial.println("Base detected \n");
 }
 
 // Unload weights in home base

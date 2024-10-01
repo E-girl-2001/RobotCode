@@ -5,12 +5,14 @@
 // SET THIS TO REAL VALUES
 #define LEFT_MOTOR_ADDRESS 29
 #define RIGHT_MOTOR_ADDRESS 28
+#define GATE_MOTOR_ADDRESS 7
 #define MIN_SPEED_CAP 1
 #define MAX_SPEED_CAP 1
 
 #define ServoA_start 145
 #define ServoA_lift_angle 80
 #define ServoA_drop_angle 10
+
 
 // #define ServoB_start 145
 // #define ServoB_lift_angle 80
@@ -19,9 +21,11 @@
 
 extern int L_sonic, R_sonic, H_tof, L_tof, S1_tof, S2_tof;
 extern bool R_flag, L_flag, HR_flag, HL_flag, BL_flag, BR_flag;
+extern bool released_the_massive_load;
 
 extern int controlA; // control signal for motor A
 extern int controlB; // control signal for motor B
+extern int controlG;
 extern int control_servoA;
 // extern int control_servoB;
 

@@ -9,19 +9,21 @@
 #include <Wire.h>
 #include <Adafruit_TCS34725.h>
 
+
+extern bool isOnHomeBase;
+extern bool leftHomeBase;
+
 void colour_setup();
 void colour_read();
 void calibrateHomeBase();
-void check_base();
+void detect_base();
 
 // Return to home base
 void return_to_base();
 
-// Detect what base (if any) the robot is above
-void detect_base();
-
 // Unload weights in home base
 void unload_weights();
+
 
 
 

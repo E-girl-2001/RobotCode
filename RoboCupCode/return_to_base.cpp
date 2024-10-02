@@ -68,6 +68,7 @@ void colour_setup()
   }
   // Initial Calibration Phase to detect home base
   calibrateHomeBase();
+  Serial.println("Colour Setup");
 }
 
 void colour_read() 

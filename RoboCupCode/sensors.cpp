@@ -174,12 +174,12 @@ void tof_read(void)
 {
   longHigh = sensorsL1[1].readRangeContinuousMillimeters(); //left
   longLow = sensorsL1[0].readRangeContinuousMillimeters(); //right
-  shortLeft = sensorsL0[2].readRangeContinuousMillimeters(); //short 1
-  shortRight = sensorsL0[3].readRangeContinuousMillimeters(); //short 2
-  shortHighLeft = sensorsL0[4].readRangeContinuousMillimeters(); //short 3
-  shortHighRight = sensorsL0[5].readRangeContinuousMillimeters(); //short 4
-  shortLowLeft = sensorsL0[6].readRangeContinuousMillimeters(); //short 5
-  shortLowRight = sensorsL0[7].readRangeContinuousMillimeters(); //short 6
+  shortLeft = sensorsL0[0].readRangeContinuousMillimeters(); //short 1
+  shortRight = sensorsL0[1].readRangeContinuousMillimeters(); //short 2
+  shortHighLeft = sensorsL0[2].readRangeContinuousMillimeters(); //short 3
+  shortHighRight = sensorsL0[3].readRangeContinuousMillimeters(); //short 4
+  shortLowLeft = sensorsL0[4].readRangeContinuousMillimeters(); //short 5
+  shortLowRight = sensorsL0[5].readRangeContinuousMillimeters(); //short 6
   Serial.print("\n");
   print_tof();
   
@@ -235,24 +235,24 @@ void update_flags()
     R_flag = 0;
   }
 
-  if(H_tof < front_distance) {
+  if(longHigh < front_distance) {
     if (L_sonic < R_sonic) {
       BL_flag = 1;
     } else {
       BR_flag = 1;
     }
-  } else if(H_tof > 12) {
+  } else if(longHigh > 12) {
     BR_flag = 0;
     BL_flag = 0;
   }
 
-  if(S1_tof > L_tof && S1_tof > S2_tof) {
+  if(shortLeft > longLow && shortLeft > shortRight) {
     HR_flag = 1;
   } else {
     HR_flag = 0;
   }
 
-  if(S2_tof > L_tof && S2_tof > S1_tof) {
+  if(shortRight > longLow && shortRight > shortLeft) {
     HL_flag = 1;
   } else {
     HL_flag = 0;

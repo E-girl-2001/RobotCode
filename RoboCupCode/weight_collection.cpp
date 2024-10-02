@@ -21,7 +21,7 @@ int weight_counter = 0;
 
 void weight_scan()
 {
-  if(L_tof < (H_tof - detect_tolerance)) {
+  if(longLow < (longHigh - detect_tolerance)) {
     detected = true;
   } else {
     detected = false;

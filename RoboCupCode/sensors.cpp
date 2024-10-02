@@ -172,15 +172,15 @@ void print_ultrasonic()
 
 void tof_read(void)
 {
-  longHigh = sensorsL1[1].readRangeContinuousMillimeters(); //left
-  longLow = sensorsL1[0].readRangeContinuousMillimeters(); //right
+  longLow = sensorsL1[0].readRangeContinuousMillimeters(); // Long low
+  longHigh = sensorsL1[1].readRangeContinuousMillimeters(); // Long high
   shortLeft = sensorsL0[0].readRangeContinuousMillimeters(); //short 1
   shortRight = sensorsL0[1].readRangeContinuousMillimeters(); //short 2
   shortHighLeft = sensorsL0[2].readRangeContinuousMillimeters(); //short 3
   shortHighRight = sensorsL0[3].readRangeContinuousMillimeters(); //short 4
   shortLowLeft = sensorsL0[4].readRangeContinuousMillimeters(); //short 5
   shortLowRight = sensorsL0[5].readRangeContinuousMillimeters(); //short 6
-  Serial.print("\n");
+  Serial.print("LL0, \tLH1, \tSL2, \tSR3, \tSHL4, \tSHR5, \tSLL6, \tSLR7\n"); 
   print_tof();
   
 }
@@ -188,23 +188,23 @@ void tof_read(void)
 void print_tof()
 {
   // Note: left and right are from the robot perspective
-  Serial.print("shortLeft,\tshortRight,\tshortHighLeft,\tshortHighRight,\tshortLowLeft,\tshortLowRight,\tlongHigh,\tlongLow\n");
-  Serial.print(shortLeft);
-  Serial.print(",\t");
-  Serial.print(shortRight);
-  Serial.print(",\t");
-  Serial.print(shortHighLeft);
-  Serial.print(",\t");
-  Serial.print(shortHighRight);
-  Serial.print(",\t");
-  Serial.print(shortLowLeft);
-  Serial.print(",\t");
-  Serial.print(shortLowRight);
-  Serial.print(",\t");
-  Serial.print(longHigh);
-  Serial.print(",\t");
   Serial.print(longLow);
+  Serial.print(", \t");
+  Serial.print(longHigh);
+  Serial.print(", \t");
+  Serial.print(shortLeft);
+  Serial.print(", \t");
+  Serial.print(shortRight);
+  Serial.print(", \t");
+  Serial.print(shortHighLeft);
+  Serial.print(", \t");
+  Serial.print(shortHighRight);
+  Serial.print(", \t");
+  Serial.print(shortLowLeft);
+  Serial.print(", \t");
+  Serial.print(shortLowRight);
   Serial.print("\n");
+
 }
 
 bool read_limit()

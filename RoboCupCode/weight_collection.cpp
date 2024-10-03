@@ -12,21 +12,48 @@
 
 
 
-#define detect_tolerance 20
+#define long_detect_tolerance 50
+#define short_detect_tolerance 50
 
 bool detected = 0;
+bool right_detected = 0;
+bool left_detected = 0;
 bool inductive = 0;
 int weight_counter = 0;
 
 
-void weight_scan()
-{
-  if(longLow < (longHigh - detect_tolerance)) {
+void weight_scan() {
+  // check all TOF sensors for weight
+  if (longLow < (longHigh - long_detect_tolerance)) {
     detected = true;
+    left_detected = false;
+    right_detected = false;
   } else {
     detected = false;
   }
+  // Priotises the right side turning arbitarily if both sides are detected
+  if ((shortLowLeft < (shortHighLeft - short_detect_tolerance)) && !detected && !left_detected) {
+    right_detected = true;
+  }
+
+  if ((shortLowRight < (shortHighRight - short_detect_tolerance )) && !detected) {
+    left_detected = true;
+  }
+  
 }
+
+void print_weight_detection_status() {
+  Serial.print("Detected: ");
+  Serial.print(detected);
+  Serial.print(" Left: ");
+  Serial.print(left_detected);
+  Serial.print(" Right: ");
+  Serial.print(right_detected);
+  Serial.print(" Counter: ");
+  Serial.print(weight_counter);
+  Serial.print("\n");
+}
+
 
 void weight_collect()
 {

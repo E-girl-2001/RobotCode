@@ -23,6 +23,7 @@ int control_DropMotor = 0;
 bool released_the_massive_load = false;
 
 
+
 void motor_setup()
 {
   motorA.attach(LEFT_MOTOR_ADDRESS);
@@ -78,23 +79,40 @@ void search_drive(){
 }
 
 void hunt_drive() {
-    if (HL_flag) { //Hunting right
-        motorA.writeMicroseconds(MOTOR_FULL_FWD);  // L motor full forward
-        motorB.writeMicroseconds(MOTOR_SLOW_FWD); // R motor slow forward
-        controlA = MOTOR_FULL_FWD;
-        controlB = MOTOR_SLOW_FWD;
+    
+    if (detected) {
+        if (HL_flag) { //Hunting right
+            motorA.writeMicroseconds(MOTOR_FULL_FWD);  // L motor full forward
+            motorB.writeMicroseconds(MOTOR_SLOW_FWD); // R motor slow forward
+            controlA = MOTOR_FULL_FWD;
+            controlB = MOTOR_SLOW_FWD;
 
-    } else if (HR_flag) { //Hunting left
-        motorA.writeMicroseconds(MOTOR_SLOW_FWD);  // L motor slow forward
-        motorB.writeMicroseconds(MOTOR_FULL_FWD); // R motor full forward
-        controlA = MOTOR_SLOW_FWD;
+        } else if (HR_flag) { //Hunting left
+            motorA.writeMicroseconds(MOTOR_SLOW_FWD);  // L motor slow forward
+            motorB.writeMicroseconds(MOTOR_FULL_FWD); // R motor full forward
+            controlA = MOTOR_SLOW_FWD;
+            controlB = MOTOR_FULL_FWD;
+
+        } else { //Hunting forward
+            controlA = MOTOR_FULL_FWD;
+            controlB = MOTOR_FULL_FWD;
+        }
+    }else if (right_detected) {
+        // turn right
+        controlA = MOTOR_FULL_REV;
         controlB = MOTOR_FULL_FWD;
-
-    } else { //Hunting forward
+    } else if (left_detected) {
+        // turn left
+        controlA = MOTOR_FULL_FWD;
+        controlB = MOTOR_FULL_REV;
+    } else {
+        // move forward
         controlA = MOTOR_FULL_FWD;
         controlB = MOTOR_FULL_FWD;
     }
 }
+
+
 
 void scan_drive() {
     controlA = MOTOR_SLOW_FWD;
@@ -134,7 +152,6 @@ void homing_drive() {
         controlB = MOTOR_FULL_FWD;
     }
 }
-
 
 
 void dropping() {

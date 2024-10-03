@@ -22,18 +22,28 @@ const int AechoPin = 2;
 const int BtrigPin = 5;
 const int BechoPin = 4;
 
-const byte SX1509_AIO5 = 5;
-const uint8_t xshutPinsL1[8] = {0,1};
-const uint8_t xshutPinsL0[8] = {2,3,4,5,6,7};
-const uint8_t longSensorCount = 2; 
-const uint8_t shortSensorCount = 6;
 
-uint8_t x_ROI = 16;
-uint8_t y_ROI = 4;
+const byte SX1509_ADDRESS = 0x3F;
+#define VL53L0X_ADDRESS_START_1 0x30
+#define VL53L0X_ADDRESS_START_2 0x40
+#define VL53L1X_ADDRESS_START_3 0x50
+
+
+// The number of sensors in your system.
+const uint8_t sensorCount_1 = 4;
+const uint8_t sensorCount_2 = 2;
+const uint8_t sensorCount_3 = 2;
+
+
+// The Arduino pin connected to the XSHUT pin of each sensor.
+const uint8_t xshutPins_1[8] = {0,1,2,3,4,5,6,7};
+const uint8_t xshutPins_2[8] = {4,5,6,7};
+const uint8_t xshutPins_3[8] = {6,7};
 
 SX1509 io; // Create an SX1509 object to be used throughout
-VL53L0X sensorsL0[shortSensorCount];
-VL53L1X sensorsL1[longSensorCount];
+VL53L0X sensors_1[sensorCount_1];
+VL53L0X sensors_2[sensorCount_2];
+VL53L1X sensors_3[sensorCount_3];
 
 
 //SETUP
@@ -49,67 +59,78 @@ void ultrasonic_setup()
 
 }
 
+
 void tof_setup()
 {
-  if (!io.begin(SX1509_ADDRESS_2))
-  {
-    Serial.println("Failed to communicate.");
-    while (1) ;
-  }
+  while (!Serial) {}
+  Serial.begin(115200);
+
+  io.begin(SX1509_ADDRESS);
+
   Wire.begin();
-  Wire.setClock(400000);
+  Wire.setClock(400000); // use 400 kHz I2C
 
-  // ---------- Disable/reset all sensors by driving their XSHUT pins low. ---------
-  for (uint8_t i = 0; i < longSensorCount; i++)
+  // Disable/reset all sensors by driving their XSHUT pins low.
+  for (uint8_t i = 0; i < sensorCount_1; i++)
   {
-    io.pinMode(xshutPinsL1[i], OUTPUT);
-    io.digitalWrite(xshutPinsL1[i], LOW);
+    io.pinMode(xshutPins_1[i], OUTPUT);
+    io.digitalWrite(xshutPins_1[i], LOW);
   }
-  for (uint8_t i = 0; i < shortSensorCount; i++)
+  for (uint8_t i = 0; i < sensorCount_2; i++)
   {
-    io.pinMode(xshutPinsL0[i], OUTPUT);
-    io.digitalWrite(xshutPinsL0[i], LOW);
+    io.pinMode(xshutPins_2[i], OUTPUT);
+    io.digitalWrite(xshutPins_2[i], LOW);
+  }
+  for (uint8_t i = 0; i < sensorCount_3; i++)
+  {
+    io.pinMode(xshutPins_3[i], OUTPUT);
+    io.digitalWrite(xshutPins_3[i], LOW);
   }
 
-  // --------- L0 Enable, initialize, and start each sensor, one by one. ---------
-  for (uint8_t i = 0; i < shortSensorCount; i++)
+
+  // Enable, initialize, and start each sensor, one by one.
+  for (uint8_t i = 0; i < sensorCount_1; i++)
   {
-    io.digitalWrite(xshutPinsL0[i], HIGH);
+    io.digitalWrite(xshutPins_1[i], HIGH);
     delay(10);
-
-    sensorsL0[i].setTimeout(500);
-    if (!sensorsL0[i].init())
+    sensors_1[i].setTimeout(500);
+    if (!sensors_1[i].init())
     {
-      Serial.print("Failed to detect and initialize sensor L0 ");
+      Serial.print("Failed to detect and initialize sensor ");
       Serial.println(i);
       while (1);
     }
-    sensorsL0[i].setAddress(VL53L0X_ADDRESS_START + i);
-    sensorsL0[i].startContinuous(50);
+    sensors_1[i].setAddress(VL53L0X_ADDRESS_START_1 + i);
+    sensors_1[i].startContinuous(50);
   }
-
-    // ---------- L1 Enable, initialize, and start each sensor, one by one. ----------
-  for (uint8_t i = 0; i < longSensorCount; i++)
+  for (uint8_t i = 0; i < sensorCount_2; i++)
   {
-    io.digitalWrite(xshutPinsL1[i], HIGH);
+    io.digitalWrite(xshutPins_2[i], HIGH);
     delay(10);
-    sensorsL1[i].setTimeout(500);
-    if (!sensorsL1[i].init())
+    sensors_2[i].setTimeout(500);
+    if (!sensors_2[i].init())
     {
-      Serial.print("Failed to detect and initialize sensor L1 ");
+      Serial.print("Failed to detect and initialize sensor ");
       Serial.println(i);
       while (1);
     }
-    // Set both long range sensors to be filtered with SPADs
-    sensorsL1[i].setAddress(VL53L1X_ADDRESS_START + i);
-    sensorsL1[i].startContinuous(50);
-    sensorsL1[i].setROISize(x_ROI, y_ROI);
-    delay(10);
-    sensorsL1[i].setROICenter(199);
-    delay(10);
+    sensors_2[i].setAddress(VL53L0X_ADDRESS_START_2 + i);
+    sensors_2[i].startContinuous(50);
   }
-  
-  Serial.print("Tof setup\n");
+  for (uint8_t i = 0; i < sensorCount_3; i++)
+  {
+    io.digitalWrite(xshutPins_3[i], HIGH);
+    delay(10);
+    sensors_3[i].setTimeout(500);
+    if (!sensors_3[i].init())
+    {
+      Serial.print("Failed to detect and initialize sensor ");
+      Serial.println(i);
+      while (1);
+    }
+    sensors_3[i].setAddress(VL53L1X_ADDRESS_START_3 + i);
+    sensors_3[i].startContinuous(50);
+  }
 }
 
 void pick_up_setup()
@@ -172,15 +193,34 @@ void print_ultrasonic()
 
 void tof_read(void)
 {
-  longLow = sensorsL1[0].readRangeContinuousMillimeters(); // Long low
-  longHigh = sensorsL1[1].readRangeContinuousMillimeters(); // Long high
-  shortLeft = sensorsL0[0].readRangeContinuousMillimeters(); //short 1
-  shortRight = sensorsL0[1].readRangeContinuousMillimeters(); //short 2
-  shortHighLeft = sensorsL0[2].readRangeContinuousMillimeters(); //short 3
-  shortHighRight = sensorsL0[3].readRangeContinuousMillimeters(); //short 4
-  shortLowLeft = sensorsL0[4].readRangeContinuousMillimeters(); //short 5
-  shortLowRight = sensorsL0[5].readRangeContinuousMillimeters(); //short 6
-  // Serial.print("LL0, \tLH1, \tSL2, \tSR3, \tSHL4, \tSHR5, \tSLL6, \tSLR7\n"); 
+
+  longLow = sensors_3[0].readRangeContinuousMillimeters();
+  longHigh = sensors_3[1].readRangeContinuousMillimeters();
+  shortLeft = sensors_1[0].readRangeContinuousMillimeters();
+  shortRight = sensors_1[1].readRangeContinuousMillimeters();
+  shortHighLeft = sensors_1[2].readRangeContinuousMillimeters();
+  shortHighRight = sensors_1[3].readRangeContinuousMillimeters();
+  shortLowLeft = sensors_2[0].readRangeContinuousMillimeters();
+  shortLowRight = sensors_2[1].readRangeContinuousMillimeters();
+  //   for (uint8_t i = 0; i < sensorCount_1; i++)
+  // {
+  //   Serial.print(sensors_1[i].readRangeContinuousMillimeters());
+  //   if (sensors_2[i].timeoutOccurred()) { Serial.print(" TIMEOUT"); }
+  //   Serial.print('\t');
+  // }
+  // for (uint8_t i = 0; i < sensorCount_2; i++)
+  // {
+  //   Serial.print(sensors_2[i].readRangeContinuousMillimeters());
+  //   if (sensors_2[i].timeoutOccurred()) { Serial.print(" TIMEOUT"); }
+  //   Serial.print('\t');
+  // }
+  // for (uint8_t i = 0; i < sensorCount_3; i++)
+  // {
+  //   Serial.print(sensors_3[i].read());
+  //   if (sensors_3[i].timeoutOccurred()) { Serial.print(" TIMEOUT"); }
+  //   Serial.print('\t');
+  // }
+  // Serial.println();
   // print_tof();
   
 }
@@ -207,11 +247,11 @@ void print_tof()
 
 }
 
-bool read_limit()
-{
-  bool limit = io.digitalRead(SX1509_AIO5);
-  return limit;
-}
+// bool read_limit()
+// {
+//   bool limit = io.digitalRead(SX1509_AIO5);
+//   return limit;
+// }
 bool read_inductive()
 {
   bool inductive = digitalRead(inductor_pin);

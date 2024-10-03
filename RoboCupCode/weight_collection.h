@@ -16,11 +16,15 @@
 #define NO_WEIGHT               0   
 #define WEIGHT_FOUND            1
 
+extern bool detected;
+extern bool right_detected;
+extern bool left_detected;
 extern int weight_counter;
 extern bool detected;
 
 void weight_collect(void);
 void weight_scan(void);
+void print_weight_detection_status(void);
 
 
 #endif /* WEIGHT_COLLECTION_H_ */

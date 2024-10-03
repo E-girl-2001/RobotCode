@@ -12,8 +12,8 @@ Servo servoA, servoB;      // create servo object to control a servo
 #define MOTOR_FULL_FWD 1900
 #define MOTOR_FULL_REV 1100
 #define MOTOR_STOP 1500 
-#define MOTOR_SLOW_FWD 1600
-#define MOTOR_SLOW_REV 1400
+#define MOTOR_SLOW_FWD 1800
+#define MOTOR_SLOW_REV 1200
 
 int controlA = MOTOR_STOP; // control signal for motor A
 int controlB = MOTOR_STOP; // control signal for motor B
@@ -55,23 +55,23 @@ void idle_drive(){
 
 void search_drive(){
     if (BR_flag) { // reverse right
-        Serial.print("REV RIGHT\n");
+        // Serial.print("REV RIGHT\n");
             controlA = MOTOR_FULL_REV;
             controlB = MOTOR_SLOW_FWD;
         } else if (BL_flag) { // reverse left
-        Serial.print("REV LEFT\n");
+        // Serial.print("REV LEFT\n");
             controlA = MOTOR_SLOW_FWD;
             controlB = MOTOR_FULL_REV;
         }else if (R_flag) {  // turn right
-            Serial.print("RIGHT\n");
+            // Serial.print("RIGHT\n");
             controlA = MOTOR_FULL_REV;
             controlB = MOTOR_FULL_FWD;
         } else if (L_flag) { // turn left
-            Serial.print("LEFT\n");
+            // Serial.print("LEFT\n");
             controlA = MOTOR_FULL_FWD;
             controlB = MOTOR_FULL_REV;
         } else { // forward
-        Serial.print("FWD\n");
+        // Serial.print("FWD\n");
             controlA = MOTOR_FULL_FWD;
             controlB = MOTOR_FULL_FWD;
         }
@@ -102,8 +102,8 @@ void scan_drive() {
 }
 
 void collect_drive() {
-    controlA = MOTOR_SLOW_FWD;
-    controlB = MOTOR_SLOW_FWD;
+    controlA = 1700;
+    controlB = 1700;
 }
 
 

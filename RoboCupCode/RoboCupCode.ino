@@ -111,7 +111,6 @@ Task tUpdate_state(UPDATE_STATE_PERIOD,       UPDATE_STATE_TASK_NUM_PERIOD,    &
 
 // Tasks to scan for weights and collection upon detection
 Task tWeight_scan(WEIGHT_SCAN_TASK_PERIOD,       WEIGHT_SCAN_TASK_NUM_EXECUTE,    &weight_scan);
-Task tCollect_weight(COLLECT_WEIGHT_TASK_PERIOD, COLLECT_WEIGHT_TASK_NUM_EXECUTE, &weight_collect);
 Task tDetect_base(DETECT_BASE_TASK_PERIOD, DETECT_BASE_TASK_NUM_EXECUTE, &detect_base);
 Scheduler taskManager;
 
@@ -127,14 +126,15 @@ void setup() {
   //IMU_setup();
   colour_setup();
   pick_up_setup();
-  delay(10);
+  // delay(10);
   motor_setup();
-  delay(10);
+  // delay(10);
   task_init();
-  delay(10);
+  // delay(10);
   Wire.begin();
   Serial.print("Setup Complete\n");
-  delay(100);
+  Serial.print("----------------\n");
+  // delay(100);
   //activate();
 }
 
@@ -143,7 +143,7 @@ void pin_init(){
     pinMode(activateButton, INPUT);
     pinMode(IO_POWER, OUTPUT);              //Pin 49 is used to enable IO power
     digitalWrite(IO_POWER, 1);              //Enable IO power on main CPU board
-    Serial.println("Pins have been initialised \n"); 
+    Serial.print("Pins have been initialised \n"); 
 }
 
 
@@ -158,7 +158,6 @@ void task_init() {
   taskManager.addTask(tUpdate_state);
   taskManager.addTask(tSet_motor); 
   taskManager.addTask(tWeight_scan);
-  taskManager.addTask(tCollect_weight);
   taskManager.addTask(tDetect_base);
   //taskManager.addTask(tRead_colour);
   //taskManager.addTask(tSensor_average);
@@ -174,7 +173,7 @@ void task_init() {
   tDetect_base.enable();
   //tRead_colour.enable();
   //tSensor_average.enable();
-  Serial.println("Tasks have been initialised \n");
+  Serial.print("Tasks have been initialised\n");
 }
 
 

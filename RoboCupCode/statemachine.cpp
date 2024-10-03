@@ -4,9 +4,9 @@
 #include "sensors.h"
 #include "weight_collection.h"
 
-#define SCAN_LENGTH 100
-#define SCAN_FREQUENCY 1000
-#define HUNT_LENGTH 1000
+#define SCAN_LENGTH 10
+#define SCAN_FREQUENCY 10
+#define HUNT_LENGTH 10
 
 // State Variables
 int currentState = IDLE;
@@ -21,24 +21,25 @@ int scan_length_time = 0;
 int hunt_length_time = 0;
 
 void update_state() {
-  // Serial.print("STATE: ");
-  // Serial.print(currentState);
-  // Serial.print("\n");
+  print_state();
+  if (!read_inductive()) {
+    currentState = COLLECT;
+  }
   switch (currentState) {
     case IDLE:
         // Handle the IDLE state
         activate_idle();
         idle_drive();
         break;
-
-
     case SEARCH:
         scan_freq_timer();
         search_drive();
-        Serial.print("Searching\n");
-        if (detected) {
-          currentState = HUNT;
-        } else if (scan_freq_time == 0) {
+        // Serial.print("Searching\n");
+        // if (detected) {
+        //   currentState = HUNT;
+        // } else 
+        if (scan_freq_time == 0) {
+          scan_length_time = 1;
           currentState = SCAN;
         } 
         break;
@@ -46,7 +47,7 @@ void update_state() {
 
     case HUNT:
         hunt_drive();
-        Serial.print("Hunting\n");
+        // Serial.print("Hunting\n");
         // Cancel out of HUNT after set period or if weight is detected
         if (detected) {
           currentState = COLLECT;
@@ -58,7 +59,9 @@ void update_state() {
 
 
     case SCAN:
+        scan_length_timer();
         if (scan_length_time == 0) {
+          scan_freq_time = 1;
           currentState = SEARCH;
         } else {
           scan_drive();
@@ -69,7 +72,7 @@ void update_state() {
     case COLLECT:
         collect_drive();
         weight_collect();
-        Serial.print("Collecting\n");
+        // Serial.print("Collecting\n");
         if (weight_counter == 3) {
           currentState = HOMING;
         } else {
@@ -81,7 +84,7 @@ void update_state() {
     case HOMING:
         // Handle the HOMING state
         homing_drive();
-        Serial.print("Homing\n");
+        // Serial.print("Homing\n");
         // Unload weights only if we are back at home base after having left
         if (isOnHomeBase && leftHomeBase) {
           leftHomeBase = false;  // Reset flag since we've just unloaded
@@ -91,7 +94,7 @@ void update_state() {
 
     case DROPPING:
         // Handle the DROPPING state
-        Serial.print("Dropping\n");
+        // Serial.print("Dropping\n");
         dropping();
         if (released_the_massive_load){
           released_the_massive_load = false;
@@ -103,6 +106,25 @@ void update_state() {
     default:
         // Handle unknown states
         break;
+  }
+}
+
+void print_state() {
+  Serial.print("STATE: ");
+  if (currentState == IDLE) {
+    Serial.print("IDLE\n");
+  } else if (currentState == SEARCH) {
+    Serial.print("SEARCH\n");
+  } else if (currentState == HUNT) {
+    Serial.print("HUNT\n");
+  } else if (currentState == SCAN) {
+    Serial.print("SCAN\n");
+  } else if (currentState == COLLECT) {
+    Serial.print("COLLECT\n");
+  } else if (currentState == HOMING) {
+    Serial.print("HOMING\n");
+  } else if (currentState == DROPPING) {
+    Serial.print("DROPPING\n");
   }
 }
 
@@ -127,7 +149,6 @@ void hunt_length_timer() {
     hunt_length_time = 0;
   }
 }
-
 
 
 void activate_idle() {

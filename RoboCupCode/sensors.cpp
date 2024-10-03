@@ -180,8 +180,8 @@ void tof_read(void)
   shortHighRight = sensorsL0[3].readRangeContinuousMillimeters(); //short 4
   shortLowLeft = sensorsL0[4].readRangeContinuousMillimeters(); //short 5
   shortLowRight = sensorsL0[5].readRangeContinuousMillimeters(); //short 6
-  Serial.print("LL0, \tLH1, \tSL2, \tSR3, \tSHL4, \tSHR5, \tSLL6, \tSLR7\n"); 
-  print_tof();
+  // Serial.print("LL0, \tLH1, \tSL2, \tSR3, \tSHL4, \tSHR5, \tSLL6, \tSLR7\n"); 
+  // print_tof();
   
 }
 

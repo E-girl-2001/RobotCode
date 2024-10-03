@@ -41,11 +41,11 @@ bool debounce = 0;
 
 
 //**********************************************************************************
-#define US_READ_TASK_PERIOD                 40
-#define TOF_READ_TASK_PERIOD                40
+#define US_READ_TASK_PERIOD                 20
+#define TOF_READ_TASK_PERIOD                20
 #define COLOUR_READ_TASK_PERIOD             40
 #define SENSOR_AVERAGE_PERIOD               40
-#define SET_MOTOR_TASK_PERIOD               40
+#define SET_MOTOR_TASK_PERIOD               20
 #define WEIGHT_SCAN_TASK_PERIOD             40
 #define COLLECT_WEIGHT_TASK_PERIOD          40
 #define RETURN_TO_BASE_TASK_PERIOD          40
@@ -54,8 +54,8 @@ bool debounce = 0;
 #define CHECK_WATCHDOG_TASK_PERIOD          40
 #define VICTORY_DANCE_TASK_PERIOD           40
 #define DRIVE_TASK_PERIOD                   50
-#define UPDATE_FLAG_PERIOD                  10
-#define UPDATE_STATE_PERIOD                 10
+#define UPDATE_FLAG_PERIOD                  40
+#define UPDATE_STATE_PERIOD                 40
 #define WEIGHT_DETECT_PERIOD                50
 #define ACTIVATE_IDLE_PERIOD                80
 #define IMU_TASK_PERIOD                     40

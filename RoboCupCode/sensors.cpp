@@ -194,6 +194,10 @@ void print_ultrasonic()
 void tof_read(void)
 {
 
+//const uint8_t xshutPins_1[8] = {0,1,2,3,4,5,6,7};
+//const uint8_t xshutPins_2[8] = {4,5,6,7};
+//const uint8_t xshutPins_3[8] = {6,7};
+
   longLow = sensors_3[0].readRangeContinuousMillimeters();
   longHigh = sensors_3[1].readRangeContinuousMillimeters();
   shortLeft = sensors_1[0].readRangeContinuousMillimeters();
@@ -221,7 +225,7 @@ void tof_read(void)
   //   Serial.print('\t');
   // }
   // Serial.println();
-  // print_tof();
+  print_tof();
   
 }
 

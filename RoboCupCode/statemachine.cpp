@@ -21,7 +21,7 @@ int scan_length_time = 0;
 int hunt_length_time = 0;
 
 void update_state() {
-  // print_state();
+  print_state();
   // if (read_inductive()) {
   //   currentState = COLLECT;
   // }

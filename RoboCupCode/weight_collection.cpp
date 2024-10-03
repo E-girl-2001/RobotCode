@@ -28,17 +28,19 @@ void weight_scan() {
     detected = true;
     left_detected = false;
     right_detected = false;
-  } else {
-    detected = false;
-  }
-  // Priotises the right side turning arbitarily if both sides are detected
-  if ((shortLowLeft < (shortHighLeft - short_detect_tolerance)) && !detected && !left_detected) {
+  } else if ((shortLowLeft < (shortHighLeft - short_detect_tolerance)) && !detected && !left_detected) {
     right_detected = true;
+  } else if ((shortLowRight < (shortHighRight - short_detect_tolerance )) && !detected) {
+    left_detected = true;
+  } else {
+    detected = false; 
   }
 
-  if ((shortLowRight < (shortHighRight - short_detect_tolerance )) && !detected) {
-    left_detected = true;
-  }
+  
+  // Priotises the right side turning arbitarily if both sides are detected
+  
+
+  
   
 }
 

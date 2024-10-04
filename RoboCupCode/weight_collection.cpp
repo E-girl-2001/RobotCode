@@ -12,10 +12,10 @@
 
 
 
-#define long_detect_tolerance 50
-#define short_detect_tolerance 50
+#define long_detect_tolerance 5
+#define short_detect_tolerance 15
 #define max_front_detection 100
-#define max_side_detection 80
+#define max_side_detection 30
 
 bool detected = 0;
 bool right_detected = 0;
@@ -26,19 +26,22 @@ int weight_counter = 0;
 
 void weight_scan() {
   // check all TOF sensors for weight
-  if (longLow < (longHigh - long_detect_tolerance) && (longLow < max_front_detection)) {
-    detected = true;
-    left_detected = false;
-    right_detected = false;
-  } else if ((shortLowLeft < (shortHighLeft - short_detect_tolerance)) && !detected && !left_detected && (shortLowLeft < max_side_detection)) {
-    right_detected = true;
-  } else if ((shortLowRight < (shortHighRight - short_detect_tolerance )) && !detected && (shortLowRight < max_side_detection)) {
-    left_detected = true;
-  } else {
-    detected = false; 
+  if (currentState == SEARCH) {
+    if (longLow < (longHigh - long_detect_tolerance) && (longLow < max_front_detection)) {
+      detected = true;
+      left_detected = false;
+      right_detected = false;
+    } else if ((shortLowLeft < (shortHighLeft - short_detect_tolerance)) && !detected && !right_detected && (shortLowLeft < max_side_detection) && (L_sonic > 10)) {
+      left_detected = true;
+    } else if ((shortLowRight < (shortHighRight - short_detect_tolerance )) && !detected && !left_detected && (shortLowRight < max_side_detection) && (R_sonic > 10)) {
+      right_detected = true;
+    } else {
+      detected = false;
+      //currentState = SEARCH;
+    }
+    print_weight_detection_status();
   }
 
-  print_weight_detection_status();
   // Priotises the right side turning arbitarily if both sides are detected
   
 

@@ -45,7 +45,7 @@ bool debounce = 0;
 #define TOF_READ_TASK_PERIOD                20
 #define COLOUR_READ_TASK_PERIOD             40
 #define SENSOR_AVERAGE_PERIOD               40
-#define SET_MOTOR_TASK_PERIOD               20
+#define SET_MOTOR_TASK_PERIOD               40
 #define WEIGHT_SCAN_TASK_PERIOD             40
 #define COLLECT_WEIGHT_TASK_PERIOD          40
 #define RETURN_TO_BASE_TASK_PERIOD          40

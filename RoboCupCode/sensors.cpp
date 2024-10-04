@@ -15,6 +15,8 @@
 #define side_distance 14
 #define front_distance 14
 
+#define BUFFER_SIZE 4
+
 //#define 
 const int AtrigPin = 3;
 const int AechoPin = 2;
@@ -39,6 +41,9 @@ const uint8_t sensorCount_3 = 2;
 const uint8_t xshutPins_1[8] = {0,1,2,3,4,5,6,7};
 const uint8_t xshutPins_2[8] = {4,5,6,7};
 const uint8_t xshutPins_3[8] = {6,7};
+
+uint8_t x_ROI = 16;
+uint8_t y_ROI = 4;
 
 SX1509 io; // Create an SX1509 object to be used throughout
 VL53L0X sensors_1[sensorCount_1];
@@ -102,6 +107,7 @@ void tof_setup()
     }
     sensors_1[i].setAddress(VL53L0X_ADDRESS_START_1 + i);
     sensors_1[i].startContinuous(50);
+
   }
   for (uint8_t i = 0; i < sensorCount_2; i++)
   {
@@ -116,6 +122,8 @@ void tof_setup()
     }
     sensors_2[i].setAddress(VL53L0X_ADDRESS_START_2 + i);
     sensors_2[i].startContinuous(50);
+
+
   }
   for (uint8_t i = 0; i < sensorCount_3; i++)
   {
@@ -130,6 +138,11 @@ void tof_setup()
     }
     sensors_3[i].setAddress(VL53L1X_ADDRESS_START_3 + i);
     sensors_3[i].startContinuous(50);
+
+    sensors_3[i].setROISize(x_ROI, y_ROI);
+    delay(10);
+    sensors_3[i].setROICenter(199);
+    delay(10);
   }
 }
 
@@ -191,42 +204,55 @@ void print_ultrasonic()
   Serial.print("\n");
 }
 
+int buffer_pos = 0;
+int longLow_buff[BUFFER_SIZE] = {0, 0, 0, 0};
+int longHigh_buff[BUFFER_SIZE] = {0, 0, 0, 0};
+int shortLeft_buff[BUFFER_SIZE] = {0, 0, 0, 0};
+int shortRight_buff[BUFFER_SIZE] = {0, 0, 0, 0};
+int shortHighLeft_buff[BUFFER_SIZE] = {0, 0, 0, 0};
+int shortHighRight_buff[BUFFER_SIZE] = {0, 0, 0, 0};
+int shortLowLeft_buff[BUFFER_SIZE] = {0, 0, 0, 0};
+int shortLowRight_buff[BUFFER_SIZE] = {0, 0, 0, 0};
+
+int average_filter(int* buffer, int new_val) {
+  // Shift values and add new reading to buffer
+  buffer[buffer_pos] = new_val;
+
+  // Calculate the moving average
+  int sum = 0;
+  for (int i = 0; i < BUFFER_SIZE; i++) {
+    sum += buffer[i];
+  }
+
+  return sum / BUFFER_SIZE;
+}
+
 void tof_read(void)
 {
 
-//const uint8_t xshutPins_1[8] = {0,1,2,3,4,5,6,7};
-//const uint8_t xshutPins_2[8] = {4,5,6,7};
-//const uint8_t xshutPins_3[8] = {6,7};
+  int longLow_reading = sensors_3[0].readRangeContinuousMillimeters()/10;
+  int longHigh_reading = sensors_3[1].readRangeContinuousMillimeters()/10;
+  int shortLeft_reading = sensors_1[0].readRangeContinuousMillimeters()/10;
+  int shortRight_reading = sensors_1[1].readRangeContinuousMillimeters()/10;
+  int shortHighLeft_reading = sensors_1[2].readRangeContinuousMillimeters()/10;
+  int shortHighRight_reading = sensors_1[3].readRangeContinuousMillimeters()/10;
+  int shortLowLeft_reading = sensors_2[0].readRangeContinuousMillimeters()/10;
+  int shortLowRight_reading = sensors_2[1].readRangeContinuousMillimeters()/10;
 
-  longLow = sensors_3[0].readRangeContinuousMillimeters()/10;
-  longHigh = sensors_3[1].readRangeContinuousMillimeters()/10;
-  shortLeft = sensors_1[0].readRangeContinuousMillimeters()/10;
-  shortRight = sensors_1[1].readRangeContinuousMillimeters()/10;
-  shortHighLeft = sensors_1[2].readRangeContinuousMillimeters()/10;
-  shortHighRight = sensors_1[3].readRangeContinuousMillimeters()/10;
-  shortLowLeft = sensors_2[0].readRangeContinuousMillimeters()/10;
-  shortLowRight = sensors_2[1].readRangeContinuousMillimeters()/10;
-  //   for (uint8_t i = 0; i < sensorCount_1; i++)
-  // {
-  //   Serial.print(sensors_1[i].readRangeContinuousMillimeters());
-  //   if (sensors_2[i].timeoutOccurred()) { Serial.print(" TIMEOUT"); }
-  //   Serial.print('\t');
-  // }
-  // for (uint8_t i = 0; i < sensorCount_2; i++)
-  // {
-  //   Serial.print(sensors_2[i].readRangeContinuousMillimeters());
-  //   if (sensors_2[i].timeoutOccurred()) { Serial.print(" TIMEOUT"); }
-  //   Serial.print('\t');
-  // }
-  // for (uint8_t i = 0; i < sensorCount_3; i++)
-  // {
-  //   Serial.print(sensors_3[i].read());
-  //   if (sensors_3[i].timeoutOccurred()) { Serial.print(" TIMEOUT"); }
-  //   Serial.print('\t');
-  // }
-  // Serial.println();
-  print_tof();
-  
+  // Update buffers and get averaged values
+  longLow = average_filter(longLow_buff, longLow_reading);
+  longHigh = average_filter(longHigh_buff, longHigh_reading);
+  shortLeft = average_filter(shortLeft_buff, shortLeft_reading);
+  shortRight = average_filter(shortRight_buff, shortRight_reading);
+  shortHighLeft = average_filter(shortHighLeft_buff, shortHighLeft_reading);
+  shortHighRight = average_filter(shortHighRight_buff, shortHighRight_reading);
+  shortLowLeft = average_filter(shortLowLeft_buff, shortLowLeft_reading);
+  shortLowRight = average_filter(shortLowRight_buff, shortLowRight_reading);
+
+  // Increment buffer position and wrap around
+  buffer_pos = (buffer_pos + 1) % BUFFER_SIZE;
+
+  print_tof();  
 }
 
 void print_tof()

@@ -39,6 +39,7 @@ void update_state() {
         Serial.print("Searching\n");
         if (detected || right_detected || left_detected) {
           currentState = HUNT;
+          hunt_length_time = 0;
         } else 
         if (scan_freq_time == 0) {
           scan_length_time = 1;
@@ -49,11 +50,18 @@ void update_state() {
 
     case HUNT:
         hunt_drive();
-        // Serial.print("Hunting\n");
-        // Cancel out of HUNT after set period or if weight is detected
-        // if (hunt_length_time == 0) {
-        //   currentState = SEARCH;
-        // }
+        Serial.print("Hunting\n");
+        //Cancel out of HUNT after set period or if weight is detected
+        if (hunt_length_time > 50) {
+          currentState = SEARCH;
+          hunt_length_time = 0;
+        } else {
+          hunt_length_time++;
+        }
+
+        if (!detected && !left_detected && !right_detected) {
+          currentState = SEARCH;
+        }
 
         break;
 

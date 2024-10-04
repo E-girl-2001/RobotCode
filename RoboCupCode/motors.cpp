@@ -100,15 +100,18 @@ void hunt_drive() {
         }
     }else if (right_detected) {
         // turn right
-        controlA = MOTOR_FULL_REV;
+        Serial.print("SCAN RIGHT\n");
+        controlA = MOTOR_STOP;
         controlB = MOTOR_FULL_FWD;
         turn_timer++;
     } else if (left_detected) {
         // turn left
+        Serial.print("SCAN LEFT\n");
         controlA = MOTOR_FULL_FWD;
-        controlB = MOTOR_FULL_REV;
+        controlB = MOTOR_STOP;
         turn_timer++;
-    } else if (turn_timer > 50) {
+    } else if (turn_timer > 10) {
+      Serial.print("TURN TIMEOUT");
         turn_timer = 0;
         currentState = SEARCH;
     } else {

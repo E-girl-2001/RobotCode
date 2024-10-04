@@ -198,14 +198,14 @@ void tof_read(void)
 //const uint8_t xshutPins_2[8] = {4,5,6,7};
 //const uint8_t xshutPins_3[8] = {6,7};
 
-  longLow = sensors_3[0].readRangeContinuousMillimeters();
-  longHigh = sensors_3[1].readRangeContinuousMillimeters();
-  shortLeft = sensors_1[0].readRangeContinuousMillimeters();
-  shortRight = sensors_1[1].readRangeContinuousMillimeters();
-  shortHighLeft = sensors_1[2].readRangeContinuousMillimeters();
-  shortHighRight = sensors_1[3].readRangeContinuousMillimeters();
-  shortLowLeft = sensors_2[0].readRangeContinuousMillimeters();
-  shortLowRight = sensors_2[1].readRangeContinuousMillimeters();
+  longLow = sensors_3[0].readRangeContinuousMillimeters()/10;
+  longHigh = sensors_3[1].readRangeContinuousMillimeters()/10;
+  shortLeft = sensors_1[0].readRangeContinuousMillimeters()/10;
+  shortRight = sensors_1[1].readRangeContinuousMillimeters()/10;
+  shortHighLeft = sensors_1[2].readRangeContinuousMillimeters()/10;
+  shortHighRight = sensors_1[3].readRangeContinuousMillimeters()/10;
+  shortLowLeft = sensors_2[0].readRangeContinuousMillimeters()/10;
+  shortLowRight = sensors_2[1].readRangeContinuousMillimeters()/10;
   //   for (uint8_t i = 0; i < sensorCount_1; i++)
   // {
   //   Serial.print(sensors_1[i].readRangeContinuousMillimeters());
@@ -285,9 +285,10 @@ void update_flags()
     } else {
       BR_flag = 1;
     }
-  } else if(longHigh > 12) {
-    BR_flag = 0;
+  } else if(longHigh > 12 && BL_flag == 1 && L_sonic > 10) {
     BL_flag = 0;
+  } else if(longHigh > 12 && BR_flag == 1 && R_sonic > 10) {
+    BR_flag = 0;
   }
 
   if(shortLeft > longLow && shortLeft > shortRight) {

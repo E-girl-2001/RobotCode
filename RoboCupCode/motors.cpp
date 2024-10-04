@@ -20,6 +20,7 @@ int controlB = MOTOR_STOP; // control signal for motor B
 int controlG = MOTOR_STOP;
 int control_servoA = ServoA_start;
 int control_DropMotor = 0;
+int turn_timer = 0;
 bool released_the_massive_load = false;
 
 
@@ -99,14 +100,20 @@ void hunt_drive() {
         }
     }else if (right_detected) {
         // turn right
-        controlA = MOTOR_SLOW_REV;
+        controlA = MOTOR_FULL_REV;
         controlB = MOTOR_FULL_FWD;
+        turn_timer++;
     } else if (left_detected) {
         // turn left
         controlA = MOTOR_FULL_FWD;
-        controlB = MOTOR_SLOW_REV;
+        controlB = MOTOR_FULL_REV;
+        turn_timer++;
+    } else if (turn_timer > 50) {
+        turn_timer = 0;
+        currentState = SEARCH;
     } else {
         // move forward
+      turn_timer = 0;
       currentState = SEARCH;
     }
 }

@@ -41,17 +41,16 @@ bool debounce = 0;
 
 
 //**********************************************************************************
-#define US_READ_TASK_PERIOD                 20
+#define US_READ_TASK_PERIOD                 40
 #define TOF_READ_TASK_PERIOD                20
 #define COLOUR_READ_TASK_PERIOD             40
 #define SENSOR_AVERAGE_PERIOD               40
 #define SET_MOTOR_TASK_PERIOD               40
-#define WEIGHT_SCAN_TASK_PERIOD             40
+#define WEIGHT_SCAN_TASK_PERIOD             20
 #define COLLECT_WEIGHT_TASK_PERIOD          40
 #define RETURN_TO_BASE_TASK_PERIOD          40
 #define DETECT_BASE_TASK_PERIOD             40
 #define UNLOAD_WEIGHTS_TASK_PERIOD          40
-#define CHECK_WATCHDOG_TASK_PERIOD          40
 #define VICTORY_DANCE_TASK_PERIOD           40
 #define DRIVE_TASK_PERIOD                   50
 #define UPDATE_FLAG_PERIOD                  40
@@ -91,7 +90,6 @@ bool debounce = 0;
 // Global variables used in sensors and motors
 long shortLeft, shortRight, shortHighLeft, shortHighRight, shortLowLeft, shortLowRight, longHigh, longLow;
 int L_sonic, R_sonic;
-bool R_flag, L_flag, HR_flag, HL_flag, BL_flag, BR_flag;
 
 //**********************************************************************************
 // Task Scheduler and Tasks
@@ -106,7 +104,6 @@ Task tRead_IMU(IMU_TASK_PERIOD,    IMU_TASK_NUM_EXECUTE, &IMU_read);
 
 // Task to set the motor speeds and direction
 Task tSet_motor(SET_MOTOR_TASK_PERIOD,           SET_MOTOR_TASK_NUM_EXECUTE,      &set_motor);
-Task tUpdate_flags(UPDATE_FLAG_PERIOD,       UPDATE_FLAG_TASK_NUM_PERIOD,    &update_flags);
 Task tUpdate_state(UPDATE_STATE_PERIOD,       UPDATE_STATE_TASK_NUM_PERIOD,    &update_state);
 
 // Tasks to scan for weights and collection upon detection
@@ -154,7 +151,6 @@ void task_init() {
   taskManager.addTask(tRead_ultrasonic);
   taskManager.addTask(tRead_tof);
   taskManager.addTask(tRead_IMU);
-  taskManager.addTask(tUpdate_flags);
   taskManager.addTask(tUpdate_state);
   taskManager.addTask(tSet_motor); 
   taskManager.addTask(tWeight_scan);
@@ -166,7 +162,6 @@ void task_init() {
   tRead_ultrasonic.enable();
   tRead_tof.enable();
   //tRead_IMU.enable();
-  tUpdate_flags.enable();
   tUpdate_state.enable();
   tSet_motor.enable();
   tWeight_scan.enable();

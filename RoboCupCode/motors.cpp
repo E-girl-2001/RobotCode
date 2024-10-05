@@ -9,13 +9,16 @@
 Servo motorA, motorB, motorG;      // create servo object to control a servo
 Servo servoA, servoB;      // create servo object to control a servo
 
-#define MOTOR_FULL_FWD 1900
-#define MOTOR_FULL_REV 1000
+#define MOTOR_FULL_FWD 1880
+#define MOTOR_FULL_REV 1020
 #define MOTOR_STOP 1500 
 #define MOTOR_SLOW_FWD 1800
 #define MOTOR_SLOW_REV 1200
 
-#define TURN_TIMEOUT 10
+#define side_distance 14
+#define front_distance 20
+
+#define TURN_TIMEOUT 30
 
 int controlA = MOTOR_STOP; // control signal for motor A
 int controlB = MOTOR_STOP; // control signal for motor B
@@ -58,19 +61,19 @@ void idle_drive(){
 }
 
 void search_drive(){
-    if (BR_flag) { // reverse right
+    if ((longHigh < front_distance) && (R_sonic < L_sonic)) { // reverse right
         Serial.print("REV RIGHT\n");
             controlA = MOTOR_FULL_REV;
             controlB = MOTOR_SLOW_FWD;
-        } else if (BL_flag) { // reverse left
+        } else if ((longHigh < front_distance) && (L_sonic < R_sonic)) { // reverse left
         Serial.print("REV LEFT\n");
             controlA = MOTOR_SLOW_FWD;
             controlB = MOTOR_FULL_REV;
-        }else if (R_flag) {  // turn right
+        }else if ((R_sonic < side_distance)) {  // turn right
             Serial.print("RIGHT\n");
             controlA = MOTOR_FULL_REV;
             controlB = MOTOR_FULL_FWD;
-        } else if (L_flag) { // turn left
+        } else if ((L_sonic < side_distance)) { // turn left
             Serial.print("LEFT\n");
             controlA = MOTOR_FULL_FWD;
             controlB = MOTOR_FULL_REV;
@@ -84,23 +87,19 @@ void search_drive(){
 void hunt_drive() {
     
     if (detected) {
-        if (HL_flag) { //Hunting right
+        if (shortRight > longLow && shortRight > shortLeft) { //Hunting right
           Serial.print("HUNTING RIGHT");
-          motorA.writeMicroseconds(MOTOR_FULL_FWD);  // L motor full forward
-          motorB.writeMicroseconds(MOTOR_SLOW_FWD); // R motor slow forward
           controlA = MOTOR_FULL_FWD;
           controlB = MOTOR_SLOW_FWD;
 
-        } else if (HR_flag) { //Hunting left
+        } else if (shortLeft > longLow && shortLeft > shortRight) { //Hunting left
           Serial.print("HUNTING LEFT");
-          motorA.writeMicroseconds(MOTOR_SLOW_FWD);  // L motor slow forward
-          motorB.writeMicroseconds(MOTOR_FULL_FWD); // R motor full forward
           controlA = MOTOR_SLOW_FWD;
           controlB = MOTOR_FULL_FWD;
 
         } else { //Hunting forward
-          controlA = MOTOR_FULL_FWD;
-          controlB = MOTOR_FULL_FWD;
+          controlA = MOTOR_SLOW_FWD;
+          controlB = MOTOR_SLOW_FWD;
         }
     } else if (turn_timer > TURN_TIMEOUT) {
       Serial.print("TURN TIMEOUT");
@@ -111,7 +110,7 @@ void hunt_drive() {
     }
     else if (right_detected) {
         // turn right
-        Serial.print("SCAN RIGHT\n");
+        Serial.print("HUNTING RIGHT\n");
         controlA = MOTOR_SLOW_FWD;
         controlB = MOTOR_SLOW_REV;
         turn_timer++;
@@ -120,7 +119,7 @@ void hunt_drive() {
         Serial.print("\n");
     } else if (left_detected) {
         // turn left
-        Serial.print("SCAN LEFT\n");
+        Serial.print("HUNTING LEFT\n");
         controlA = MOTOR_SLOW_REV;
         controlB = MOTOR_SLOW_FWD;
         turn_timer++;
@@ -142,8 +141,8 @@ void scan_drive() {
 }
 
 void collect_drive() {
-    controlA = 1700;
-    controlB = 1700;
+    motorA.writeMicroseconds(MOTOR_STOP);  // L motor full forward
+    motorB.writeMicroseconds(MOTOR_STOP); // R motor slow forward
 }
 
 

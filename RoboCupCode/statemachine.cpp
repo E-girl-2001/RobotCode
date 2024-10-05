@@ -21,16 +21,13 @@ int scan_length_time = 0;
 int hunt_length_time = 0;
 
 void update_state() {
-  print_state();
-  // if (read_inductive()) {
+
+  // if (!read_limit()) {
+  //   Serial.print("Limit\n");
   //   currentState = COLLECT;
   // }
+  print_state();
   switch (currentState) {
-    case IDLE:
-        // Handle the IDLE state
-        activate_idle();
-        idle_drive();
-        break;
 
     case SEARCH:
         // scan_freq_timer();
@@ -77,15 +74,15 @@ void update_state() {
         break;
 
     case COLLECT:
-        collect_drive();
-        weight_collect();
-        // Serial.print("Collecting\n");
-        if (weight_counter == 3) {
-          currentState = HOMING;
-        } else {
-          currentState = SEARCH;
-        }
-        break;
+      Serial.print("Collecting\n");
+      collect_drive();
+      weight_collect();
+      if (weight_counter == 3) {
+        currentState = HOMING;
+      } else {
+        currentState = SEARCH;
+      }
+      break;
 
 
     case HOMING:
@@ -108,6 +105,11 @@ void update_state() {
           currentState = SEARCH;
         }
         break;
+    case IDLE:
+    // Handle the IDLE state
+    activate_idle();
+    idle_drive();
+    break;
 
     default:
         // Handle unknown states

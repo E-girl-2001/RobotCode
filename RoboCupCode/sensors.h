@@ -6,7 +6,7 @@
 #define SENSORS_H_
 
 // #define SX1509_ADDRESS  0x3E
-// #define SX1509_ADDRESS_2  0x3F // SX1509 I2C address
+#define SX1509_ADDRESS_2  0x3E // SX1509 I2C address
 
 
 // #define VL53L0X_ADDRESS_START 0x30
@@ -32,7 +32,7 @@ void tof_read(void);
 
 void update_flags();
 
-// bool read_limit();
+bool read_limit();
 
 bool read_inductive();
 

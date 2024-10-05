@@ -7,6 +7,7 @@
 
 #include "sensors.h"
 #include "Arduino.h"
+#include "statemachine.h"
 #include <VL53L0X.h>
 #include <VL53L1X.h>
 #include <Wire.h>
@@ -15,7 +16,7 @@
 #define side_distance 14
 #define front_distance 14
 
-#define BUFFER_SIZE 4
+#define BUFFER_SIZE 2
 
 //#define 
 const int AtrigPin = 3;
@@ -24,11 +25,13 @@ const int AechoPin = 2;
 const int BtrigPin = 5;
 const int BechoPin = 4;
 
+const byte SX1509_AIO5 = 5;
+const byte SX1509_INTERRUPT_PIN = 2; 
 
 const byte SX1509_ADDRESS = 0x3F;
 #define VL53L0X_ADDRESS_START_1 0x30
-#define VL53L0X_ADDRESS_START_2 0x40
-#define VL53L1X_ADDRESS_START_3 0x50
+#define VL53L0X_ADDRESS_START_2 0x35
+#define VL53L1X_ADDRESS_START_3 0x38
 
 
 // The number of sensors in your system.
@@ -50,6 +53,8 @@ VL53L0X sensors_1[sensorCount_1];
 VL53L0X sensors_2[sensorCount_2];
 VL53L1X sensors_3[sensorCount_3];
 
+unsigned long lastDebounceTime = 0;   // For debouncing
+unsigned long debounceDelay = 50;     // Debounce delay (in ms)
 
 //SETUP
 //***********************************************************************
@@ -144,19 +149,44 @@ void tof_setup()
     sensors_3[i].setROICenter(199);
     delay(10);
   }
+
+  Serial.print("TOF Setup\n");
 }
 
-void pick_up_setup()
-{
-  pinMode(inductor_pin, INPUT); //inductor sensor setup
-  pinMode(magnet_pin, OUTPUT); //electromagnet setup
-  // io.pinMode(SX1509_AIO5, INPUT); //limit_switch setup
-  // if (!io.begin(SX1509_ADDRESS))
-  // {
-  //   Serial.println("Failed to communicate.");
-  //   while (1) ;
-  // }
+void limitSwitchISR() {
+  // Debounce logic
+  unsigned long currentTime = millis();
+  if ((currentTime - lastDebounceTime) > debounceDelay) {
+    //currentState = COLLECT;  // Update current state to COLLECT
+    Serial.print("limit\n");
+    lastDebounceTime = currentTime;  // Reset debounce timer
+
+    // Clear the interrupt on the SX1509
+    uint16_t interruptSource = io.interruptSource();
+    if (interruptSource & (1 << SX1509_AIO5)) {
+      Serial.println("Interrupt cleared on SX1509 pin.");
+    }
+  }
 }
+
+void pick_up_setup() {
+  pinMode(inductor_pin, INPUT);  // Inductor sensor setup
+  pinMode(magnet_pin, OUTPUT);   // Electromagnet setup
+
+  // Set up SX1509 communication
+  if (!io.begin(SX1509_ADDRESS)) {
+    Serial.println("Failed to communicate.");
+    while (1);  // Halt if communication fails
+  }
+
+  io.pinMode(SX1509_AIO5, INPUT);  // Limit switch setup
+  //io.enableInterrupt(SX1509_AIO5, RISING);  // Enable interrupt on falling edge
+
+  // Attach interrupt to the Arduino pin connected to SX1509's interrupt pin
+  // pinMode(SX1509_INTERRUPT_PIN, INPUT_PULLDOWN);
+  // attachInterrupt(digitalPinToInterrupt(SX1509_INTERRUPT_PIN), limitSwitchISR, CHANGE);
+}
+
 
 //READ
 //***********************************************************************
@@ -205,14 +235,14 @@ void print_ultrasonic()
 }
 
 int buffer_pos = 0;
-int longLow_buff[BUFFER_SIZE] = {0, 0, 0, 0};
-int longHigh_buff[BUFFER_SIZE] = {0, 0, 0, 0};
-int shortLeft_buff[BUFFER_SIZE] = {0, 0, 0, 0};
-int shortRight_buff[BUFFER_SIZE] = {0, 0, 0, 0};
-int shortHighLeft_buff[BUFFER_SIZE] = {0, 0, 0, 0};
-int shortHighRight_buff[BUFFER_SIZE] = {0, 0, 0, 0};
-int shortLowLeft_buff[BUFFER_SIZE] = {0, 0, 0, 0};
-int shortLowRight_buff[BUFFER_SIZE] = {0, 0, 0, 0};
+int longLow_buff[BUFFER_SIZE] = {0, 0};
+int longHigh_buff[BUFFER_SIZE] = {0, 0};
+int shortLeft_buff[BUFFER_SIZE] = {0, 0};
+int shortRight_buff[BUFFER_SIZE] = {0, 0};
+int shortHighLeft_buff[BUFFER_SIZE] = {0, 0};
+int shortHighRight_buff[BUFFER_SIZE] = {0, 0};
+int shortLowLeft_buff[BUFFER_SIZE] = {0, 0};
+int shortLowRight_buff[BUFFER_SIZE] = {0, 0};
 
 int average_filter(int* buffer, int new_val) {
   // Shift values and add new reading to buffer
@@ -277,11 +307,14 @@ void print_tof()
 
 }
 
-// bool read_limit()
-// {
-//   bool limit = io.digitalRead(SX1509_AIO5);
-//   return limit;
-// }
+bool read_limit()
+{
+  bool limit = io.digitalRead(SX1509_AIO5);
+  return limit;
+}
+
+
+
 bool read_inductive()
 {
   bool inductive = digitalRead(inductor_pin);
@@ -291,41 +324,41 @@ bool read_inductive()
 //STATES
 //***********************************************************************
 
-void update_flags()
-{
-  if((L_sonic < side_distance) && (!R_flag)) {
-    L_flag = 1;
-  } else if (L_sonic > 8) {
-    L_flag = 0;
-  }
+// void update_flags()
+// {
+//   if((L_sonic < side_distance) && (!R_flag)) {
+//     L_flag = 1;
+//   } else if (L_sonic > 8) {
+//     L_flag = 0;
+//   }
 
-  if((R_sonic < side_distance) && (!L_flag)) {
-    R_flag = 1;
-  } else if (R_sonic > 8) {
-    R_flag = 0;
-  }
+//   if((R_sonic < side_distance) && (!L_flag)) {
+//     R_flag = 1;
+//   } else if (R_sonic > 8) {
+//     R_flag = 0;
+//   }
 
-  if(longHigh < front_distance) {
-    if (L_sonic < R_sonic) {
-      BL_flag = 1;
-    } else {
-      BR_flag = 1;
-    }
-  } else if(longHigh > 12 && BL_flag == 1 && L_sonic > 10) {
-    BL_flag = 0;
-  } else if(longHigh > 12 && BR_flag == 1 && R_sonic > 10) {
-    BR_flag = 0;
-  }
+//   if(longHigh < front_distance) {
+//     if (L_sonic < R_sonic) {
+//       BL_flag = 1;
+//     } else {
+//       BR_flag = 1;
+//     }
+//   } else if(longHigh > 12 && BL_flag == 1 && L_sonic > 10) {
+//     BL_flag = 0;
+//   } else if(longHigh > 12 && BR_flag == 1 && R_sonic > 10) {
+//     BR_flag = 0;
+//   }
 
-  if(shortLeft > longLow && shortLeft > shortRight) {
-    HR_flag = 1;
-  } else {
-    HR_flag = 0;
-  }
+//   if(shortLeft > longLow && shortLeft > shortRight) {
+//     HR_flag = 1;
+//   } else {
+//     HR_flag = 0;
+//   }
 
-  if(shortRight > longLow && shortRight > shortLeft) {
-    HL_flag = 1;
-  } else {
-    HL_flag = 0;
-  }
-}
+//   if(shortRight > longLow && shortRight > shortLeft) {
+//     HL_flag = 1;
+//   } else {
+//     HL_flag = 0;
+//   }
+// }

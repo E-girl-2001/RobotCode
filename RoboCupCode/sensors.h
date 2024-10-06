@@ -14,6 +14,7 @@
 
 const int inductor_pin = 21;
 const int magnet_pin = 24;
+const int limit_pin = 14;
 
 extern long shortLeft, shortRight, shortHighLeft, shortHighRight, shortLowLeft, shortLowRight, longHigh, longLow;
 extern int L_sonic, R_sonic;
@@ -32,7 +33,7 @@ void tof_read(void);
 
 void update_flags();
 
-bool read_limit();
+void read_limit();
 
 bool read_inductive();
 

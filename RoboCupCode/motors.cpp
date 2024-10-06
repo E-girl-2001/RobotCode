@@ -87,12 +87,12 @@ void search_drive(){
 void hunt_drive() {
     
     if (detected) {
-        if (shortRight > longLow && shortRight > shortLeft) { //Hunting right
+        if (shortRight < longLow && shortRight < shortLeft) { //Hunting right
           Serial.print("HUNTING RIGHT");
           controlA = MOTOR_FULL_FWD;
           controlB = MOTOR_SLOW_FWD;
 
-        } else if (shortLeft > longLow && shortLeft > shortRight) { //Hunting left
+        } else if (shortLeft < longLow && shortLeft < shortRight) { //Hunting left
           Serial.print("HUNTING LEFT");
           controlA = MOTOR_SLOW_FWD;
           controlB = MOTOR_FULL_FWD;

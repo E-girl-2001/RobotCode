@@ -42,7 +42,7 @@ bool debounce = 0;
 
 //**********************************************************************************
 #define US_READ_TASK_PERIOD                 40
-#define TOF_READ_TASK_PERIOD                20
+#define TOF_READ_TASK_PERIOD                10
 #define COLOUR_READ_TASK_PERIOD             40
 #define SENSOR_AVERAGE_PERIOD               40
 #define SET_MOTOR_TASK_PERIOD               40
@@ -58,6 +58,7 @@ bool debounce = 0;
 #define WEIGHT_DETECT_PERIOD                50
 #define ACTIVATE_IDLE_PERIOD                80
 #define IMU_TASK_PERIOD                     40
+#define LIMIT_TASK_PERIOD                   30
 
 // Task execution amount definitions
 // -1 means indefinitely
@@ -79,6 +80,7 @@ bool debounce = 0;
 #define WEIGHT_DETECT_NUM_PERIOD           -1
 #define ACTIVATE_IDLE_NUM_PERIOD           -1
 #define IMU_TASK_NUM_EXECUTE               -1
+#define LIMIT_TASK_NUM_EXECUTE             -1
 
 
 // Pin deffinitions
@@ -101,6 +103,7 @@ Task tRead_tof(TOF_READ_TASK_PERIOD,               TOF_READ_TASK_NUM_EXECUTE,   
 //Task tRead_colour(COLOUR_READ_TASK_PERIOD,       COLOUR_READ_TASK_NUM_EXECUTE,    &read_colour);
 //Task tSensor_average(SENSOR_AVERAGE_PERIOD,      SENSOR_AVERAGE_NUM_EXECUTE,      &sensor_average);
 Task tRead_IMU(IMU_TASK_PERIOD,    IMU_TASK_NUM_EXECUTE, &IMU_read);
+Task tRead_Limit(LIMIT_TASK_PERIOD,    LIMIT_TASK_NUM_EXECUTE, &read_limit);
 
 // Task to set the motor speeds and direction
 Task tSet_motor(SET_MOTOR_TASK_PERIOD,           SET_MOTOR_TASK_NUM_EXECUTE,      &set_motor);
@@ -151,6 +154,7 @@ void task_init() {
   taskManager.addTask(tRead_ultrasonic);
   taskManager.addTask(tRead_tof);
   taskManager.addTask(tRead_IMU);
+  taskManager.addTask(tRead_Limit);
   taskManager.addTask(tUpdate_state);
   taskManager.addTask(tSet_motor); 
   taskManager.addTask(tWeight_scan);
@@ -161,6 +165,7 @@ void task_init() {
   // ---------- Enable the tasks ----------
   tRead_ultrasonic.enable();
   tRead_tof.enable();
+  tRead_Limit.enable();
   //tRead_IMU.enable();
   tUpdate_state.enable();
   tSet_motor.enable();

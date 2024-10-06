@@ -22,21 +22,27 @@ bool right_detected = 0;
 bool left_detected = 0;
 bool inductive = 0;
 int weight_counter = 0;
+int detected_timer = 0;
+int detected_timeout = 5;
 
 
 void weight_scan() {
   // check all TOF sensors for weight
   if (longLow < (longHigh - long_detect_tolerance) && (longLow < max_front_detection)) {
     detected = true;
+    detected_timer = 0;
     left_detected = false;
     right_detected = false;
     Serial.print("detected\n");
-  } else if ((shortLowLeft < (shortHighLeft - short_detect_tolerance)) && !detected && !right_detected && (shortLowLeft < max_side_detection) && (L_sonic > 10)) {
+  } else if ((shortLowLeft < (shortHighLeft - short_detect_tolerance))&& (shortLowLeft < max_side_detection) && (L_sonic > 10)) {
     left_detected = true;
-  } else if ((shortLowRight < (shortHighRight - short_detect_tolerance )) && !detected && !left_detected && (shortLowRight < max_side_detection) && (R_sonic > 10)) {
+  } else if ((shortLowRight < (shortHighRight - short_detect_tolerance )) && (shortLowRight < max_side_detection) && (R_sonic > 10)) {
     right_detected = true;
   } else {
-    detected = false;
+    detected_timer++;
+    if (detected_timer > detected_timeout) {
+      detected = false;
+    }
     //currentState = SEARCH;
   print_weight_detection_status();
   }

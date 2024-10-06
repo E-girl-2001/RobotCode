@@ -16,7 +16,7 @@
 #define side_distance 14
 #define front_distance 14
 
-#define BUFFER_SIZE 2
+#define BUFFER_SIZE 5
 
 //#define 
 const int AtrigPin = 3;
@@ -46,7 +46,10 @@ const uint8_t xshutPins_2[8] = {4,5,6,7};
 const uint8_t xshutPins_3[8] = {6,7};
 
 uint8_t x_ROI = 16;
-uint8_t y_ROI = 4;
+uint8_t y_ROI = 16;
+
+int max_LTOF_range = 120;
+int max_STOF_range = 60;
 
 SX1509 io; // Create an SX1509 object to be used throughout
 VL53L0X sensors_1[sensorCount_1];
@@ -153,37 +156,23 @@ void tof_setup()
   Serial.print("TOF Setup\n");
 }
 
-void limitSwitchISR() {
-  // Debounce logic
-  unsigned long currentTime = millis();
-  if ((currentTime - lastDebounceTime) > debounceDelay) {
-    //currentState = COLLECT;  // Update current state to COLLECT
-    Serial.print("limit\n");
-    lastDebounceTime = currentTime;  // Reset debounce timer
-
-    // Clear the interrupt on the SX1509
-    uint16_t interruptSource = io.interruptSource();
-    if (interruptSource & (1 << SX1509_AIO5)) {
-      Serial.println("Interrupt cleared on SX1509 pin.");
-    }
-  }
-}
 
 void pick_up_setup() {
   pinMode(inductor_pin, INPUT);  // Inductor sensor setup
   pinMode(magnet_pin, OUTPUT);   // Electromagnet setup
+  pinMode(limit_pin, INPUT_PULLUP);
 
   // Set up SX1509 communication
-  if (!io.begin(SX1509_ADDRESS)) {
-    Serial.println("Failed to communicate.");
-    while (1);  // Halt if communication fails
-  }
+  // if (!io.begin(SX1509_ADDRESS)) {
+  //   Serial.println("Failed to communicate.");
+  //   while (1);  // Halt if communication fails
+  // }
 
-  io.pinMode(SX1509_AIO5, INPUT);  // Limit switch setup
-  //io.enableInterrupt(SX1509_AIO5, RISING);  // Enable interrupt on falling edge
+  // io.pinMode(SX1509_AIO5, INPUT);  // Limit switch setup
+  // io.enableInterrupt(SX1509_AIO5, FALLING);  // Enable interrupt on falling edge
 
-  // Attach interrupt to the Arduino pin connected to SX1509's interrupt pin
-  // pinMode(SX1509_INTERRUPT_PIN, INPUT_PULLDOWN);
+  // //Attach interrupt to the Arduino pin connected to SX1509's interrupt pin
+  // pinMode(SX1509_INTERRUPT_PIN, INPUT_PULLUP);
   // attachInterrupt(digitalPinToInterrupt(SX1509_INTERRUPT_PIN), limitSwitchISR, CHANGE);
 }
 
@@ -235,26 +224,31 @@ void print_ultrasonic()
 }
 
 int buffer_pos = 0;
-int longLow_buff[BUFFER_SIZE] = {0, 0};
-int longHigh_buff[BUFFER_SIZE] = {0, 0};
-int shortLeft_buff[BUFFER_SIZE] = {0, 0};
-int shortRight_buff[BUFFER_SIZE] = {0, 0};
-int shortHighLeft_buff[BUFFER_SIZE] = {0, 0};
-int shortHighRight_buff[BUFFER_SIZE] = {0, 0};
-int shortLowLeft_buff[BUFFER_SIZE] = {0, 0};
-int shortLowRight_buff[BUFFER_SIZE] = {0, 0};
+int longLow_buff[BUFFER_SIZE] = {0, 0, 0, 0, 0};
+int longHigh_buff[BUFFER_SIZE] = {0, 0, 0, 0, 0};
+int shortLeft_buff[BUFFER_SIZE] = {0, 0, 0, 0, 0};
+int shortRight_buff[BUFFER_SIZE] = {0, 0, 0, 0, 0};
+int shortHighLeft_buff[BUFFER_SIZE] = {0, 0, 0, 0, 0};
+int shortHighRight_buff[BUFFER_SIZE] = {0, 0, 0, 0, 0};
+int shortLowLeft_buff[BUFFER_SIZE] = {0, 0, 0, 0, 0};
+int shortLowRight_buff[BUFFER_SIZE] = {0, 0, 0, 0, 0};
 
-int average_filter(int* buffer, int new_val) {
+int average_filter(int sum, int* buffer, int new_val, char identifier) {
+
+  sum = sum - (buffer[buffer_pos]/BUFFER_SIZE);
   // Shift values and add new reading to buffer
-  buffer[buffer_pos] = new_val;
+  if (identifier == 'S' && new_val > max_STOF_range) {
+    buffer[buffer_pos] = max_STOF_range;
+  } else if (identifier == 'L' && new_val > max_LTOF_range) {
+    buffer[buffer_pos] = max_LTOF_range;
+  } else {
+    buffer[buffer_pos] = new_val;
+  }
+  sum = sum + (buffer[buffer_pos]/BUFFER_SIZE);
 
   // Calculate the moving average
-  int sum = 0;
-  for (int i = 0; i < BUFFER_SIZE; i++) {
-    sum += buffer[i];
-  }
 
-  return sum / BUFFER_SIZE;
+  return sum;
 }
 
 void tof_read(void)
@@ -270,17 +264,20 @@ void tof_read(void)
   int shortLowRight_reading = sensors_2[1].readRangeContinuousMillimeters()/10;
 
   // Update buffers and get averaged values
-  longLow = average_filter(longLow_buff, longLow_reading);
-  longHigh = average_filter(longHigh_buff, longHigh_reading);
-  shortLeft = average_filter(shortLeft_buff, shortLeft_reading);
-  shortRight = average_filter(shortRight_buff, shortRight_reading);
-  shortHighLeft = average_filter(shortHighLeft_buff, shortHighLeft_reading);
-  shortHighRight = average_filter(shortHighRight_buff, shortHighRight_reading);
-  shortLowLeft = average_filter(shortLowLeft_buff, shortLowLeft_reading);
-  shortLowRight = average_filter(shortLowRight_buff, shortLowRight_reading);
+  buffer_pos = (buffer_pos + 1) % BUFFER_SIZE;
+
+  longLow = average_filter(longLow, longLow_buff, longLow_reading, 'L');
+  longHigh = average_filter(longHigh, longHigh_buff, longHigh_reading, 'L');
+  shortLeft = average_filter(shortLeft, shortLeft_buff, shortLeft_reading, 'S');
+  shortRight = average_filter(shortRight, shortRight_buff, shortRight_reading, 'S');
+  shortHighLeft = average_filter(shortHighLeft, shortHighLeft_buff, shortHighLeft_reading, 'S');
+  shortHighRight = average_filter(shortHighRight, shortHighRight_buff, shortHighRight_reading, 'S');
+  shortLowLeft = average_filter(shortLowLeft, shortLowLeft_buff, shortLowLeft_reading, 'S');
+  shortLowRight = average_filter(shortLowRight, shortLowRight_buff, shortLowRight_reading, 'S');
+
 
   // Increment buffer position and wrap around
-  buffer_pos = (buffer_pos + 1) % BUFFER_SIZE;
+  
 
   print_tof();  
 }
@@ -307,10 +304,16 @@ void print_tof()
 
 }
 
-bool read_limit()
+void read_limit()
 {
-  bool limit = io.digitalRead(SX1509_AIO5);
-  return limit;
+  bool limit = digitalRead(limit_pin);
+
+  if(!limit) {
+    Serial.print("limit\n");
+    currentState = COLLECT;
+    collect_drive();
+  }
+  //return limit;
 }
 
 

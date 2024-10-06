@@ -76,7 +76,13 @@ void update_state() {
     case COLLECT:
       Serial.print("Collecting\n");
       collect_drive();
-      weight_collect();
+      if(read_inductive()) {
+        weight_collect();
+        weight_counter++;
+        Serial.print(weight_counter);
+        Serial.print("\n");
+      }
+
       if (weight_counter == 3) {
         currentState = HOMING;
       } else {
@@ -161,7 +167,7 @@ void hunt_length_timer() {
 
 void activate_idle() {
     bool debounce = start_robot;
-    // delay(20);
+    delay(20);
     start_robot = analogRead(activateButton);
     if(start_robot && debounce == 1 && currentState != IDLE) {
       currentState = IDLE;

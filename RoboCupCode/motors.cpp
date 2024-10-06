@@ -18,13 +18,15 @@ Servo servoA, servoB;      // create servo object to control a servo
 #define side_distance 14
 #define front_distance 20
 
-#define TURN_TIMEOUT 30
+#define TURN_TIMEOUT 8
 
 int controlA = MOTOR_STOP; // control signal for motor A
 int controlB = MOTOR_STOP; // control signal for motor B
 int controlG = MOTOR_STOP;
 int control_servoA = ServoA_start;
-int control_DropMotor = 0;
+int control_servoB = ServoB_start;
+
+
 int turn_timer = 0;
 bool released_the_massive_load = false;
 
@@ -36,6 +38,7 @@ void motor_setup()
   motorB.attach(RIGHT_MOTOR_ADDRESS);
   motorG.attach(GATE_MOTOR_ADDRESS);
   servoA.attach(1);
+  servoB.attach(0);
   servoA.write(ServoA_start);
   Serial.print("Motor Setup");
 } 
@@ -49,6 +52,10 @@ void set_motor() {
 
 void set_servo_mag(int control_servoA) {
   servoA.write(control_servoA);
+}
+
+void set_servo_drop(int control_servoB) {
+  servoB.write(control_servoB);
 }
 
 void set_servo_bay(int control_servoB) {
@@ -88,12 +95,12 @@ void hunt_drive() {
     
     if (detected) {
         if (shortRight < longLow && shortRight < shortLeft) { //Hunting right
-          Serial.print("HUNTING RIGHT");
+          Serial.print("BANG RIGHT");
           controlA = MOTOR_FULL_FWD;
           controlB = MOTOR_SLOW_FWD;
 
         } else if (shortLeft < longLow && shortLeft < shortRight) { //Hunting left
-          Serial.print("HUNTING LEFT");
+          Serial.print("BANG LEFT");
           controlA = MOTOR_SLOW_FWD;
           controlB = MOTOR_FULL_FWD;
 

@@ -13,6 +13,9 @@
 #define ServoA_lift_angle 82
 #define ServoA_drop_angle 10
 
+#define ServoB_start 145
+#define ServoB_travel_angle 35
+
 
 // #define ServoB_start 145
 // #define ServoB_lift_angle 80
@@ -27,6 +30,7 @@ extern int controlA; // control signal for motor A
 extern int controlB; // control signal for motor B
 extern int controlG;
 extern int control_servoA;
+extern int control_servoB;
 // extern int control_servoB;
 
 void motor_setup();

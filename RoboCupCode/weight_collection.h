@@ -25,6 +25,7 @@ extern bool detected;
 void weight_collect(void);
 void weight_scan(void);
 void print_weight_detection_status(void);
+void drop_weight(void);
 
 
 #endif /* WEIGHT_COLLECTION_H_ */

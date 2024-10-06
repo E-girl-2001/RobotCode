@@ -33,21 +33,19 @@ void update_state() {
         // scan_freq_timer();
         search_drive();
         print_weight_detection_status();
-        Serial.print("Searching\n");
         if (detected || right_detected || left_detected) {
           currentState = HUNT;
           hunt_length_time = 0;
         } else 
-        if (scan_freq_time == 0) {
-          scan_length_time = 1;
-          currentState = SCAN;
-        } 
+        // if (scan_freq_time == 0) {
+        //   scan_length_time = 1;
+        //   currentState = SCAN;
+        // } 
         break;
 
 
     case HUNT:
         hunt_drive();
-        Serial.print("Hunting\n");
         //Cancel out of HUNT after set period or if weight is detected
         if (hunt_length_time > 50) {
           currentState = SEARCH;
@@ -74,7 +72,6 @@ void update_state() {
         break;
 
     case COLLECT:
-      Serial.print("Collecting\n");
       collect_drive();
       if(read_inductive()) {
         weight_collect();
@@ -105,7 +102,7 @@ void update_state() {
     case DROPPING:
         // Handle the DROPPING state
         // Serial.print("Dropping\n");
-        dropping();
+        drop_weight();
         if (released_the_massive_load){
           released_the_massive_load = false;
           currentState = SEARCH;
@@ -167,11 +164,11 @@ void hunt_length_timer() {
 
 void activate_idle() {
     bool debounce = start_robot;
-    delay(20);
+    delay(10);
     start_robot = analogRead(activateButton);
-    if(start_robot && debounce == 1 && currentState != IDLE) {
-      currentState = IDLE;
-    } else if(start_robot && debounce == 1 && currentState == IDLE) {
+    if(start_robot && debounce && currentState == IDLE) {
       currentState = SEARCH;
+    } else if(start_robot && debounce && currentState != IDLE) {
+      currentState = IDLE;
     }
 }

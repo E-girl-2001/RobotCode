@@ -311,7 +311,7 @@ void read_limit()
   if(!limit) {
     Serial.print("limit\n");
     currentState = COLLECT;
-    collect_drive();
+    // collect_drive();
   }
   //return limit;
 }

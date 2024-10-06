@@ -73,18 +73,19 @@ void update_state() {
 
     case COLLECT:
       collect_drive();
-      if(read_inductive()) {
-        weight_collect();
-        weight_counter++;
-        Serial.print(weight_counter);
-        Serial.print("\n");
-      }
 
-      if (weight_counter == 3) {
-        currentState = HOMING;
-      } else {
-        currentState = SEARCH;
-      }
+      weight_collect();
+      weight_counter++;
+      Serial.print(weight_counter);
+      Serial.print("\n");
+      
+
+      // if (weight_counter == 3) {
+      //   currentState = HOMING;
+      // } else {
+      //   currentState = SEARCH;
+      // }
+      currentState = SEARCH;
       break;
 
 
@@ -164,11 +165,15 @@ void hunt_length_timer() {
 
 void activate_idle() {
     bool debounce = start_robot;
-    delay(10);
+    delay(50);
+    Serial.print("check\n");
     start_robot = analogRead(activateButton);
     if(start_robot && debounce && currentState == IDLE) {
+      Serial.print("activate\n");
       currentState = SEARCH;
+      delay(1000); //prevents going back into idle
     } else if(start_robot && debounce && currentState != IDLE) {
+      Serial.print("Deactivate\n");
       currentState = IDLE;
     }
 }

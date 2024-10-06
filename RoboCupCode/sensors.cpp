@@ -109,6 +109,7 @@ void tof_setup()
     sensors_1[i].setTimeout(500);
     if (!sensors_1[i].init())
     {
+      Serial.print("1: ");
       Serial.print("Failed to detect and initialize sensor ");
       Serial.println(i);
       while (1);
@@ -124,6 +125,7 @@ void tof_setup()
     sensors_2[i].setTimeout(500);
     if (!sensors_2[i].init())
     {
+      Serial.print("2: ");
       Serial.print("Failed to detect and initialize sensor ");
       Serial.println(i);
       while (1);
@@ -140,6 +142,7 @@ void tof_setup()
     sensors_3[i].setTimeout(500);
     if (!sensors_3[i].init())
     {
+      Serial.print("3: ");
       Serial.print("Failed to detect and initialize sensor ");
       Serial.println(i);
       while (1);
@@ -233,9 +236,8 @@ int shortHighRight_buff[BUFFER_SIZE] = {0, 0, 0, 0, 0};
 int shortLowLeft_buff[BUFFER_SIZE] = {0, 0, 0, 0, 0};
 int shortLowRight_buff[BUFFER_SIZE] = {0, 0, 0, 0, 0};
 
-int average_filter(int sum, int* buffer, int new_val, char identifier) {
+int average_filter(int* buffer, int new_val, char identifier) {
 
-  sum = sum - (buffer[buffer_pos]/BUFFER_SIZE);
   // Shift values and add new reading to buffer
   if (identifier == 'S' && new_val > max_STOF_range) {
     buffer[buffer_pos] = max_STOF_range;
@@ -244,13 +246,26 @@ int average_filter(int sum, int* buffer, int new_val, char identifier) {
   } else {
     buffer[buffer_pos] = new_val;
   }
-  sum = sum + (buffer[buffer_pos]/BUFFER_SIZE);
 
   // Calculate the moving average
+  int sum = 0;
+  for (int i = 0; i < BUFFER_SIZE; i++) {
+    sum += buffer[i];
+  }
 
-  return sum;
+  return sum/BUFFER_SIZE;
 }
 
+
+int low_filter(int new_val, char identifier) {
+    if (identifier == 'S' && new_val > max_STOF_range) {
+    return max_STOF_range;
+  } else if (identifier == 'L' && new_val > max_LTOF_range) {
+    return max_LTOF_range;
+  } else {
+    return new_val;
+  }
+}
 void tof_read(void)
 {
 
@@ -264,17 +279,28 @@ void tof_read(void)
   int shortLowRight_reading = sensors_2[1].readRangeContinuousMillimeters()/10;
 
   // Update buffers and get averaged values
-  buffer_pos = (buffer_pos + 1) % BUFFER_SIZE;
 
-  longLow = average_filter(longLow, longLow_buff, longLow_reading, 'L');
-  longHigh = average_filter(longHigh, longHigh_buff, longHigh_reading, 'L');
-  shortLeft = average_filter(shortLeft, shortLeft_buff, shortLeft_reading, 'S');
-  shortRight = average_filter(shortRight, shortRight_buff, shortRight_reading, 'S');
-  shortHighLeft = average_filter(shortHighLeft, shortHighLeft_buff, shortHighLeft_reading, 'S');
-  shortHighRight = average_filter(shortHighRight, shortHighRight_buff, shortHighRight_reading, 'S');
-  shortLowLeft = average_filter(shortLowLeft, shortLowLeft_buff, shortLowLeft_reading, 'S');
-  shortLowRight = average_filter(shortLowRight, shortLowRight_buff, shortLowRight_reading, 'S');
 
+
+  longLow = low_filter(longLow_reading, 'L');
+  longHigh = low_filter(longHigh_reading, 'L');
+  shortLeft = low_filter(shortLeft_reading, 'S');
+  shortRight = low_filter(shortRight_reading, 'S');
+  shortHighLeft = low_filter(shortHighLeft_reading, 'S');
+  shortHighRight = low_filter(shortHighRight_reading, 'S');
+  shortLowLeft = low_filter(shortLowLeft_reading, 'S');
+  shortLowRight = low_filter(shortLowRight_reading, 'S');
+
+  // buffer_pos = (buffer_pos + 1) % BUFFER_SIZE;
+
+  // longLow = average_filter( longLow_buff, longLow_reading, 'L');
+  // longHigh = average_filter(longHigh_buff, longHigh_reading, 'L');
+  // shortLeft = average_filter(shortLeft_buff, shortLeft_reading, 'S');
+  // shortRight = average_filter(shortRight_buff, shortRight_reading, 'S');
+  // shortHighLeft = average_filter(shortHighLeft_buff, shortHighLeft_reading, 'S');
+  // shortHighRight = average_filter(shortHighRight_buff, shortHighRight_reading, 'S');
+  // shortLowLeft = average_filter(shortLowLeft_buff, shortLowLeft_reading, 'S');
+  // shortLowRight = average_filter(shortLowRight_buff, shortLowRight_reading, 'S');
 
   // Increment buffer position and wrap around
   
@@ -310,8 +336,9 @@ void read_limit()
 
   if(!limit) {
     Serial.print("limit\n");
+    collect_drive();
     currentState = COLLECT;
-    // collect_drive();
+
   }
   //return limit;
 }

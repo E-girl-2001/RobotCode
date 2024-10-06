@@ -42,16 +42,15 @@ bool debounce = 0;
 
 //**********************************************************************************
 #define US_READ_TASK_PERIOD                 40
-#define TOF_READ_TASK_PERIOD                10
+#define TOF_READ_TASK_PERIOD                20
 #define COLOUR_READ_TASK_PERIOD             40
 #define SET_MOTOR_TASK_PERIOD               40
 #define WEIGHT_SCAN_TASK_PERIOD             20
 #define DETECT_BASE_TASK_PERIOD             40
 #define DRIVE_TASK_PERIOD                   50
-#define UPDATE_FLAG_PERIOD                  40
 #define UPDATE_STATE_PERIOD                 40
 #define WEIGHT_DETECT_PERIOD                50
-#define ACTIVATE_IDLE_PERIOD                80
+#define ACTIVATE_IDLE_PERIOD                100
 #define IMU_TASK_PERIOD                     40
 #define LIMIT_TASK_PERIOD                   30
 
@@ -155,7 +154,7 @@ void task_init() {
   tSet_motor.enable();
   tWeight_scan.enable();
   tDetect_base.enable();
-  t_Activate_idle.enable();
+  //t_Activate_idle.enable();
   //tRead_colour.enable();
   //tSensor_average.enable();
   //tRead_IMU.enable();

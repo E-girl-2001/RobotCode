@@ -26,6 +26,10 @@ int controlG = MOTOR_STOP;
 int control_servoA = ServoA_start;
 int control_servoB = ServoB_start;
 
+int currentA = controlA;
+int currentB = controlB;
+int Kp = 2;
+
 
 int turn_timer = 0;
 bool released_the_massive_load = false;
@@ -45,9 +49,17 @@ void motor_setup()
 
 
 void set_motor() {
+  // int errorA = (controlA - currentA);
+  // int errorB = (controlB - currentB);
+  // int control_effortA = MOTOR_STOP + Kp * errorA;
+  // int control_effortB = MOTOR_STOP + Kp * errorB;
+
   motorA.write(controlA);
   motorB.write(controlB);
   motorG.write(controlG);
+
+  // currentA = control_effortA;
+  // currentB = control_effortB;
 }
 
 void set_servo_mag(int control_servoA) {
@@ -92,6 +104,9 @@ void search_drive(){
 }
 
 void hunt_drive() {
+    // if (longHigh < 5) {
+    //   motorA.write(MOTOR_SLOW_REV);
+    // }
     
     if (detected) {
         if (shortRight < longLow && shortRight < shortLeft) { //Hunting right
@@ -118,8 +133,8 @@ void hunt_drive() {
     else if (right_detected) {
         // turn right
         Serial.print("HUNTING RIGHT\n");
-        controlA = MOTOR_SLOW_FWD;
-        controlB = MOTOR_SLOW_REV;
+        controlA = MOTOR_FULL_FWD;
+        controlB = MOTOR_FULL_REV;
         turn_timer++;
         Serial.print("Turn timer: ");
         Serial.print(turn_timer);
@@ -127,8 +142,8 @@ void hunt_drive() {
     } else if (left_detected) {
         // turn left
         Serial.print("HUNTING LEFT\n");
-        controlA = MOTOR_SLOW_REV;
-        controlB = MOTOR_SLOW_FWD;
+        controlA = MOTOR_FULL_REV;
+        controlB = MOTOR_FULL_FWD;
         turn_timer++;
         Serial.print("Turn timer: ");
         Serial.print(turn_timer);

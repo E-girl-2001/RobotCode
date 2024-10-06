@@ -12,7 +12,7 @@
 // #define VL53L0X_ADDRESS_START 0x30
 // #define VL53L1X_ADDRESS_START 0x35
 
-const int inductor_pin = 21;
+const int inductor_pin = 27;
 const int magnet_pin = 24;
 const int limit_pin = 14;
 

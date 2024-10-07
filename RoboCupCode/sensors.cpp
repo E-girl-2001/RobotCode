@@ -16,7 +16,7 @@
 #define side_distance 14
 #define front_distance 14
 
-#define BUFFER_SIZE 5
+#define BUFFER_SIZE 3
 
 //#define 
 const int AtrigPin = 3;
@@ -227,14 +227,14 @@ void print_ultrasonic()
 }
 
 int buffer_pos = 0;
-int longLow_buff[BUFFER_SIZE] = {0, 0, 0, 0, 0};
-int longHigh_buff[BUFFER_SIZE] = {0, 0, 0, 0, 0};
-int shortLeft_buff[BUFFER_SIZE] = {0, 0, 0, 0, 0};
-int shortRight_buff[BUFFER_SIZE] = {0, 0, 0, 0, 0};
-int shortHighLeft_buff[BUFFER_SIZE] = {0, 0, 0, 0, 0};
-int shortHighRight_buff[BUFFER_SIZE] = {0, 0, 0, 0, 0};
-int shortLowLeft_buff[BUFFER_SIZE] = {0, 0, 0, 0, 0};
-int shortLowRight_buff[BUFFER_SIZE] = {0, 0, 0, 0, 0};
+int longLow_buff[BUFFER_SIZE] = {0, 0, 0};
+int longHigh_buff[BUFFER_SIZE] = {0, 0, 0};
+int shortLeft_buff[BUFFER_SIZE] = {0, 0, 0};
+int shortRight_buff[BUFFER_SIZE] = {0, 0, 0};
+int shortHighLeft_buff[BUFFER_SIZE] = {0, 0, 0};
+int shortHighRight_buff[BUFFER_SIZE] = {0, 0, 0};
+int shortLowLeft_buff[BUFFER_SIZE] = {0, 0, 0};
+int shortLowRight_buff[BUFFER_SIZE] = {0, 0, 0};
 
 int average_filter(int* buffer, int new_val, char identifier) {
 
@@ -321,9 +321,9 @@ void print_tof()
   Serial.print(", \t");
   Serial.print(shortHighLeft);
   Serial.print(", \t");
-  Serial.print(shortHighRight);
-  Serial.print(", \t");
   Serial.print(shortLowLeft);
+  Serial.print(", \t");
+  Serial.print(shortHighRight);
   Serial.print(", \t");
   Serial.print(shortLowRight);
   Serial.print("\n");

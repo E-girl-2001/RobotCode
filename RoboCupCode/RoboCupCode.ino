@@ -52,7 +52,7 @@ bool debounce = 0;
 #define WEIGHT_DETECT_PERIOD                50
 #define ACTIVATE_IDLE_PERIOD                100
 #define IMU_TASK_PERIOD                     40
-#define LIMIT_TASK_PERIOD                   30
+#define LIMIT_TASK_PERIOD                   20
 
 // Task execution amount definitions
 // -1 means indefinitely

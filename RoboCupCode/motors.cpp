@@ -10,10 +10,12 @@ Servo motorA, motorB, motorV;      // create servo object to control a servo
 Servo servoA, servoB;      // create servo object to control a servo
 
 #define MOTOR_FULL_FWD 1900
-#define MOTOR_FULL_REV 1020
+#define MOTOR_FULL_REV 1100
 #define MOTOR_STOP 1500 
 #define MOTOR_SLOW_FWD 1800
 #define MOTOR_SLOW_REV 1200
+#define MOTOR_TURN_FWD 1850
+#define MOTOR_TURN_REV 1150
 
 #define side_distance 14
 #define front_distance 20
@@ -132,8 +134,8 @@ void hunt_drive() {
     else if (right_detected) {
         // turn right
         Serial.print("HUNTING RIGHT\n");
-        controlA = MOTOR_SLOW_FWD;
-        controlB = MOTOR_SLOW_REV;
+        controlA = MOTOR_TURN_FWD;
+        controlB = MOTOR_TURN_REV;
         turn_timer++;
         Serial.print("Turn timer: ");
         Serial.print(turn_timer);
@@ -141,8 +143,8 @@ void hunt_drive() {
     } else if (left_detected) {
         // turn left
         Serial.print("HUNTING LEFT\n");
-        controlA = MOTOR_SLOW_REV;
-        controlB = MOTOR_SLOW_FWD;
+        controlA = MOTOR_TURN_REV;
+        controlB = MOTOR_TURN_FWD;
         turn_timer++;
         Serial.print("Turn timer: ");
         Serial.print(turn_timer);
@@ -197,12 +199,12 @@ void homing_drive() {
 
 void ramp_drive() {
   if ((R_sonic < L_sonic)) { // reverse right
-      Serial.print("REV RIGHT\n");
+      Serial.print("RAMP RIGHT\n");
       motorA.writeMicroseconds(MOTOR_FULL_REV);
-      motorB.writeMicroseconds(MOTOR_SLOW_FWD);
+      motorB.writeMicroseconds(MOTOR_FULL_FWD);
   } else if ((L_sonic < R_sonic)) { // reverse left
-    Serial.print("REV LEFT\n");
-    motorA.writeMicroseconds(MOTOR_SLOW_FWD);
+    Serial.print("RAMP LEFT\n");
+    motorA.writeMicroseconds(MOTOR_FULL_FWD);
     motorA.writeMicroseconds(MOTOR_FULL_REV);
   }
   delay(500);

@@ -35,7 +35,6 @@ void update_state() {
     case SEARCH:
         // scan_freq_timer();
         search_drive();
-        print_weight_detection_status();
         if (detected || right_detected || left_detected) {
           currentState = HUNT;
           hunt_length_time = 0;
@@ -51,13 +50,13 @@ void update_state() {
         hunt_drive();
         // vibrate_length_timer();
         //Cancel out of HUNT after set period or if weight is detected
-        if (hunt_length_time > 10) {
-          currentState = SEARCH;
-          hunt_length_time = 0;
+        // if (hunt_length_time > 10) {
+        //   currentState = SEARCH;
+        //   hunt_length_time = 0;
 
-        } else {
-          hunt_length_time++;
-        }
+        // } else {
+        //   //hunt_length_time++;
+        // }
 
         if (!detected && !left_detected && !right_detected) {
           currentState = SEARCH;
@@ -146,6 +145,8 @@ void print_state() {
     Serial.print("HOMING\n");
   } else if (currentState == DROPPING) {
     Serial.print("DROPPING\n");
+  } else if (currentState == RAMP) {
+    Serial.print("RAMP\n");
   }
 }
 

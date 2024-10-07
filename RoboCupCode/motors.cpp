@@ -41,7 +41,7 @@ void motor_setup()
 {
   motorA.attach(LEFT_MOTOR_ADDRESS);
   motorB.attach(RIGHT_MOTOR_ADDRESS);
-  // motorV.attach(VIBRATOR_MOTOR_ADDRESS);
+  motorV.attach(VIBRATOR_MOTOR_ADDRESS);
   servoA.attach(1);
   servoB.attach(0);
   servoA.write(ServoA_start);

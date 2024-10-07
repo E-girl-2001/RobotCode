@@ -121,7 +121,6 @@ void setup() {
 
 }
 
-
 void pin_init(){
     pinMode(activateButton, INPUT);
     pinMode(IO_POWER, OUTPUT);              //Pin 49 is used to enable IO power

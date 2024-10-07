@@ -6,10 +6,10 @@
 #include "statemachine.h"
 
 
-Servo motorA, motorB, motorG;      // create servo object to control a servo
+Servo motorA, motorB, motorV;      // create servo object to control a servo
 Servo servoA, servoB;      // create servo object to control a servo
 
-#define MOTOR_FULL_FWD 1880
+#define MOTOR_FULL_FWD 1900
 #define MOTOR_FULL_REV 1020
 #define MOTOR_STOP 1500 
 #define MOTOR_SLOW_FWD 1800
@@ -18,11 +18,12 @@ Servo servoA, servoB;      // create servo object to control a servo
 #define side_distance 14
 #define front_distance 20
 
-#define TURN_TIMEOUT 8
+#define TURN_TIMEOUT 15
+#define HUNT_TIMEOIUT 5
 
 int controlA = MOTOR_STOP; // control signal for motor A
 int controlB = MOTOR_STOP; // control signal for motor B
-int controlG = MOTOR_STOP;
+int controlV = MOTOR_STOP;
 int control_servoA = ServoA_start;
 int control_servoB = ServoB_start;
 
@@ -40,7 +41,7 @@ void motor_setup()
 {
   motorA.attach(LEFT_MOTOR_ADDRESS);
   motorB.attach(RIGHT_MOTOR_ADDRESS);
-  motorG.attach(GATE_MOTOR_ADDRESS);
+  // motorV.attach(VIBRATOR_MOTOR_ADDRESS);
   servoA.attach(1);
   servoB.attach(0);
   servoA.write(ServoA_start);
@@ -56,7 +57,7 @@ void set_motor() {
 
   motorA.write(controlA);
   motorB.write(controlB);
-  motorG.write(controlG);
+  // motorV.write(controlV);
 
   // currentA = control_effortA;
   // currentB = control_effortB;
@@ -104,9 +105,6 @@ void search_drive(){
 }
 
 void hunt_drive() {
-    // if (longHigh < 5) {
-    //   motorA.write(MOTOR_SLOW_REV);
-    // }
     
     if (detected) {
         if (shortRight < longLow && shortRight < shortLeft) { //Hunting right
@@ -122,6 +120,7 @@ void hunt_drive() {
         } else { //Hunting forward
           controlA = MOTOR_SLOW_FWD;
           controlB = MOTOR_SLOW_FWD;
+
         }
     } else if (turn_timer > TURN_TIMEOUT) {
       Serial.print("TURN TIMEOUT");
@@ -133,8 +132,8 @@ void hunt_drive() {
     else if (right_detected) {
         // turn right
         Serial.print("HUNTING RIGHT\n");
-        controlA = MOTOR_FULL_FWD;
-        controlB = MOTOR_FULL_REV;
+        controlA = MOTOR_SLOW_FWD;
+        controlB = MOTOR_SLOW_REV;
         turn_timer++;
         Serial.print("Turn timer: ");
         Serial.print(turn_timer);
@@ -142,8 +141,8 @@ void hunt_drive() {
     } else if (left_detected) {
         // turn left
         Serial.print("HUNTING LEFT\n");
-        controlA = MOTOR_FULL_REV;
-        controlB = MOTOR_FULL_FWD;
+        controlA = MOTOR_SLOW_REV;
+        controlB = MOTOR_SLOW_FWD;
         turn_timer++;
         Serial.print("Turn timer: ");
         Serial.print(turn_timer);
@@ -200,7 +199,6 @@ void homing_drive() {
 void dropping() {
     // Handle the DROPPING state
   controlA = MOTOR_STOP;
-  controlB = MOTOR_STOP;
-  controlG = 1; //Some abritrary value to open the gate and then close the gate 
+  controlB = MOTOR_STOP; 
   released_the_massive_load = true;
 }

@@ -12,7 +12,7 @@
 
 
 
-#define long_detect_tolerance 5
+#define long_detect_tolerance 15
 #define short_detect_tolerance 15
 #define max_front_detection 100
 #define max_side_detection 40
@@ -79,6 +79,7 @@ void weight_collect()
   digitalWrite(magnet_pin, LOW);
   control_servoA = ServoA_start;
   set_servo_mag(control_servoA);
+  delay(1000);
 
   // Increment weight counter
   //weight_counter++;

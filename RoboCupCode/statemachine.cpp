@@ -7,6 +7,7 @@
 #define SCAN_LENGTH 10
 #define SCAN_FREQUENCY 10
 #define HUNT_LENGTH 10
+#define VIBRATE_LENGTH 4
 
 // State Variables
 int currentState = IDLE;
@@ -14,11 +15,13 @@ int currentState = IDLE;
 // Button to activate robot
 const int activateButton = 20; 
 bool start_robot = 0;
+bool vibrate = 0;
 
 // Timers to trigger scanning
 int scan_freq_time = 0;
 int scan_length_time = 0;
 int hunt_length_time = 0;
+int vibrate_length_time = 0;
 
 void update_state() {
 
@@ -46,10 +49,12 @@ void update_state() {
 
     case HUNT:
         hunt_drive();
+        // vibrate_length_timer();
         //Cancel out of HUNT after set period or if weight is detected
-        if (hunt_length_time > 50) {
+        if (hunt_length_time > 10) {
           currentState = SEARCH;
           hunt_length_time = 0;
+
         } else {
           hunt_length_time++;
         }
@@ -78,7 +83,7 @@ void update_state() {
       weight_counter++;
       Serial.print(weight_counter);
       Serial.print("\n");
-      
+
 
       // if (weight_counter == 3) {
       //   currentState = HOMING;
@@ -162,11 +167,24 @@ void hunt_length_timer() {
   }
 }
 
+// void vibrate_length_timer() {
+//   vibrate_length_time++;
+//   if(vibrate_length_time == VIBRATE_LENGTH) {
+//     vibrate_length_time = 0;
+//     vibrate = !vibrate;
+//   }
+//   if (vibrate) {
+//     controlV = 1900;
+//   } else {
+//     controlV = 1500;
+//   }
+// }
+
 
 void activate_idle() {
     bool debounce = start_robot;
     delay(50);
-    Serial.print("check\n");
+    //Serial.print("check\n");
     start_robot = analogRead(activateButton);
     if(start_robot && debounce && currentState == IDLE) {
       Serial.print("activate\n");

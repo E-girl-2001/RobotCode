@@ -23,6 +23,7 @@ void scan_freq_timer();
 void scan_length_timer();
 void activate_idle();
 void print_state();
+// void vibrate_length_timer();
 
 
 

@@ -12,7 +12,7 @@
 
 // ------ State Variables ------ //
 enum State {
-  IDLE = 0, SEARCH = 1, HUNT = 2, SCAN = 3, COLLECT = 4, HOMING = 5, DROPPING = 6 
+  IDLE = 0, SEARCH = 1, HUNT = 2, SCAN = 3, COLLECT = 4, HOMING = 5, DROPPING = 6, RAMP = 7 
 };
 
 extern int currentState;

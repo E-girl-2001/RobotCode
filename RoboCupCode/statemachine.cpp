@@ -93,6 +93,10 @@ void update_state() {
       currentState = SEARCH;
       break;
 
+    case RAMP:
+      ramp_drive();
+      currentState = SEARCH;
+      break;
 
     case HOMING:
         // Handle the HOMING state

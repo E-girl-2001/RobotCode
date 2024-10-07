@@ -162,8 +162,8 @@ void scan_drive() {
 }
 
 void collect_drive() {
-    motorA.writeMicroseconds(MOTOR_STOP);  // L motor full forward
-    motorB.writeMicroseconds(MOTOR_STOP); // R motor slow forward
+    motorA.writeMicroseconds(MOTOR_STOP); 
+    motorB.writeMicroseconds(MOTOR_STOP);
 }
 
 
@@ -195,6 +195,22 @@ void homing_drive() {
     }
 }
 
+void ramp_drive() {
+  if ((R_sonic < L_sonic)) { // reverse right
+      Serial.print("REV RIGHT\n");
+      motorA.writeMicroseconds(MOTOR_FULL_REV);
+      motorB.writeMicroseconds(MOTOR_SLOW_FWD);
+  } else if ((L_sonic < R_sonic)) { // reverse left
+    Serial.print("REV LEFT\n");
+    motorA.writeMicroseconds(MOTOR_SLOW_FWD);
+    motorA.writeMicroseconds(MOTOR_FULL_REV);
+  }
+  delay(500);
+  motorA.writeMicroseconds(MOTOR_FULL_FWD); 
+  motorB.writeMicroseconds(MOTOR_FULL_FWD);
+  delay(1000);
+  ramp = false;
+}
 
 void dropping() {
     // Handle the DROPPING state

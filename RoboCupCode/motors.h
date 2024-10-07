@@ -44,5 +44,6 @@ void scan_drive();
 void collect_drive();
 void homing_drive();
 void dropping();
+void ramp_drive();
 
 #endif /* MOTORS_H_ */

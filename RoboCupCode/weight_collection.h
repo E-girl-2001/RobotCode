@@ -19,6 +19,7 @@
 extern bool detected;
 extern bool right_detected;
 extern bool left_detected;
+extern bool ramp;
 extern int weight_counter;
 extern bool detected;
 

@@ -20,6 +20,7 @@
 bool detected = 0;
 bool right_detected = 0;
 bool left_detected = 0;
+bool ramp = 0;
 bool inductive = 0;
 int weight_counter = 0;
 int detected_timer = 0;
@@ -28,7 +29,9 @@ int detected_timeout = 5;
 
 void weight_scan() {
   // check all TOF sensors for weight
-  if (longLow < (longHigh - long_detect_tolerance) && (longLow < max_front_detection)) {
+  if (longLow < (longHigh - long_detect_tolerance) && shortLowLeft < (longHigh - long_detect_tolerance) && shortLowRight < (longHigh - long_detect_tolerance) && longLow < 15) {
+    currentState = RAMP;
+  } else if (longLow < (longHigh - long_detect_tolerance) && (longLow < max_front_detection)) {
     detected = true;
     detected_timer = 0;
     left_detected = false;

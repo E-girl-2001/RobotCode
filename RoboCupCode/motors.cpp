@@ -169,33 +169,96 @@ void collect_drive() {
 }
 
 
-void homing_drive() {
-    const int targetDistance = 20;  // Desired distance from the wall in cm
-    const int tolerance = 2;  // Acceptable error tolerance in cm
-    const int correctionSpeed = 1600;  // Speed to correct direction
+// void homing_drive() {
+//     const int targetDistance = 20;  // Desired distance from the wall in cm
+//     const int tolerance = 2;  // Acceptable error tolerance in cm
+//     const int headOnThreshold = 20;  // Threshold to detect a head-on collision (in cm)
 
-    // If the left sensor detects a wall closer than the target distance
-    if (L_sonic < targetDistance - tolerance) {
+//     // If the robot detects a wall head-on and needs to turn right (L_sonic < R_sonic)
+//     if (longHigh < headOnThreshold && L_sonic < R_sonic) {
+//         // Rotate in place to avoid crashing (turning right)
+//         Serial.println("Head-on collision detected! Turning right to avoid.");
+//         motorA.writeMicroseconds(MOTOR_FULL_REV);  // Turn right by moving left motor forward
+//         motorB.writeMicroseconds(MOTOR_SLOW_REV); // And the right motor backward
+//     }
+//     // If the robot detects a wall head-on and needs to turn left (R_sonic < L_sonic)
+//     else if (longHigh < headOnThreshold && R_sonic < L_sonic) {
+//         // Rotate in place to avoid crashing (turning left)
+//         Serial.println("Head-on collision detected! Turning left to avoid.");
+//         motorA.writeMicroseconds(MOTOR_SLOW_REV);  // Turn left by moving left motor backward
+//         motorB.writeMicroseconds(MOTOR_FULL_REV);  // And the right motor forward
+//     }
+//     // If the left sensor detects a wall closer than the target distance
+//     else if (L_sonic < targetDistance - tolerance) {
+//         // Turn slightly right
+//         Serial.println("Adjusting Right - Too close to Left Wall");
+//         motorA.writeMicroseconds(MOTOR_FULL_FWD);  // Left motor moves forward slower
+//         motorB.writeMicroseconds(MOTOR_SLOW_REV);  // Right motor moves forward at full speed
+//     }
+//     // If the right sensor detects a wall closer than the target distance
+//     else if (R_sonic < targetDistance - tolerance) {
+//         // Turn slightly left
+//         Serial.println("Adjusting Left - Too close to Right Wall");
+//         motorA.writeMicroseconds(MOTOR_SLOW_REV);  // Left motor moves forward at full speed
+//         motorB.writeMicroseconds(MOTOR_FULL_FWD);  // Right motor moves forward slower
+//     }
+//     // If both sensors are detecting similar distances (robot is aligned)
+//     else {
+//         // Move forward
+//         Serial.println("Moving Forward - Aligned");
+//         motorA.writeMicroseconds(MOTOR_FULL_FWD);
+//         motorB.writeMicroseconds(MOTOR_FULL_FWD);
+//     }
+// }
+
+void homing_drive() {
+    const int targetDistance = 15;  // Desired distance from the wall in cm
+    const int tolerance = 3;  // Acceptable error tolerance in cm
+    const int headOnThreshold = 20;  // Threshold to detect a head-on collision (in cm)
+
+    // Assuming the TOF sensors are named middleTOF, leftTOF, and rightTOF
+    int middleDistance = longHigh; // Front-facing TOF
+    int leftDistance =  shortHighLeft;  // Left-facing TOF
+    int rightDistance =  shortHighRight;  // Right-facing TOF
+
+    // If the robot detects a wall head-on
+    if (middleDistance < headOnThreshold) {
+        // Rotate in place to avoid crashing (turning right)
+        Serial.println("Head-on collision detected! Turning right to avoid.");
+        motorA.writeMicroseconds(MOTOR_SLOW_REV);  // Turn right by moving left motor backward
+        motorB.writeMicroseconds(MOTOR_FULL_REV);  // And the right motor backward
+    }
+    // If the robot detects a wall head-on and needs to turn left
+    // else if (middleDistance < headOnThreshold && rightDistance < leftDistance) {
+    //     // Rotate in place to avoid crashing (turning left)
+    //     Serial.println("Head-on collision detected! Turning left to avoid.");
+    //     motorA.writeMicroseconds(MOTOR_FULL_REV);  // Turn left by moving left motor backward
+    //     motorB.writeMicroseconds(MOTOR_SLOW_REV);  // And the right motor forward
+    // }
+    // If the left TOF sensor detects a wall closer than the target distance
+    else if (leftDistance < targetDistance - tolerance) {
         // Turn slightly right
         Serial.println("Adjusting Right - Too close to Left Wall");
-        controlA = MOTOR_SLOW_FWD;   // Left motor moves forward slower
-        controlB = MOTOR_FULL_FWD;   // Right motor moves forward at full speed
-
-    // If the right sensor detects a wall closer than the target distance
-    } else if (R_sonic < targetDistance - tolerance) {
+        motorA.writeMicroseconds(MOTOR_FULL_FWD);  // Left motor moves forward
+        motorB.writeMicroseconds(MOTOR_SLOW_REV);  // Right motor moves forward slower
+    }
+    // If the right TOF sensor detects a wall closer than the target distance
+    else if (rightDistance < targetDistance - tolerance) {
         // Turn slightly left
         Serial.println("Adjusting Left - Too close to Right Wall");
-        controlA = MOTOR_FULL_FWD;   // Left motor moves forward at full speed
-        controlB = MOTOR_SLOW_FWD;   // Right motor moves forward slower
-
+        motorA.writeMicroseconds(MOTOR_SLOW_REV);  // Left motor moves slower
+        motorB.writeMicroseconds(MOTOR_FULL_FWD);  // Right motor moves forward
+    }
     // If both sensors are detecting similar distances (robot is aligned)
-    } else {
+    else {
         // Move forward
         Serial.println("Moving Forward - Aligned");
-        controlA = MOTOR_FULL_FWD;
-        controlB = MOTOR_FULL_FWD;
+        motorA.writeMicroseconds(MOTOR_FULL_FWD);
+        motorB.writeMicroseconds(MOTOR_FULL_FWD);
     }
 }
+
+
 
 void ramp_drive() {
   if ((R_sonic < L_sonic)) { // reverse right

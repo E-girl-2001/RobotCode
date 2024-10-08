@@ -164,4 +164,7 @@ void task_init() {
 
 void loop() {
   taskManager.execute();
+  // ultrasonic_read();
+  // tof_read();
+  // homing_drive();
 }

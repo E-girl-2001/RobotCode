@@ -9,8 +9,8 @@
 Servo motorA, motorB, motorV;      // create servo object to control a servo
 Servo servoA, servoB;      // create servo object to control a servo
 
-#define MOTOR_FULL_FWD 1900
-#define MOTOR_FULL_REV 1100
+#define MOTOR_FULL_FWD 1880
+#define MOTOR_FULL_REV 1120
 #define MOTOR_STOP 1500 
 #define MOTOR_SLOW_FWD 1800
 #define MOTOR_SLOW_REV 1200

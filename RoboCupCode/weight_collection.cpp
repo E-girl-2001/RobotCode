@@ -48,16 +48,17 @@ void weight_scan() {
 
   if(detected) {
     if(longLow < (longHigh - long_detect_tolerance) && longLow < (shortLeft - long_detect_tolerance) && longLow < (shortRight - long_detect_tolerance) && longLow < 3) {
+      Serial.print("COLLECTION\n");
       detected = false;
       adjust_right = false;
       front_detected = false;
       adjust_left = false;
       collection_detected = true;
-    } else if((shortRight < longLow) && (shortRight < shortLeft) && shortRight < max_front_detection && shortRight > 10) {
+    } else if((shortRight < longLow) && (shortRight < shortLeft) && shortRight < max_front_detection && shortRight > 10 && R_sonic > 10) {
       adjust_right = true;
       front_detected = false;
       adjust_left = false;
-    } else if(shortLeft < longLow && (shortLeft < shortRight) && shortLeft < max_front_detection && shortLeft > 10) {
+    } else if(shortLeft < longLow && (shortLeft < shortRight) && shortLeft < max_front_detection && shortLeft > 10 && L_sonic > 10) {
       adjust_right = false;
       front_detected = false;
       adjust_left = true;
@@ -75,10 +76,10 @@ void weight_scan() {
       }     
     }
   } else if(!detected) {
-    if(shortLowLeft < (shortHighLeft - short_detect_tolerance) && (shortLowLeft < max_side_detection) && (shortHighLeft > 10) && (right_turn_timer > 20)) {
+    if(shortLowLeft < (shortHighLeft - short_detect_tolerance) && (shortLowLeft < max_side_detection) && (shortHighLeft > 10) && (right_turn_timer > 20) && (left_turn_timer > 5)) {
       left_detected = true;
       left_turn_timer = 0;
-    } else if (shortLowRight < (shortHighRight - short_detect_tolerance) && (shortLowRight < max_side_detection) && (shortHighRight > 10) && (left_turn_timer > 20)) {
+    } else if (shortLowRight < (shortHighRight - short_detect_tolerance) && (shortLowRight < max_side_detection) && (shortHighRight > 10) && (left_turn_timer > 20) && (right_turn_timer > 5)) {
       right_detected = true;
       right_turn_timer = 0;
     }

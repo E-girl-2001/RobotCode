@@ -23,6 +23,11 @@ extern bool ramp;
 extern int weight_counter;
 extern bool detected;
 
+extern bool adjust_right;
+extern bool adjust_left;
+extern bool front_detected;
+extern bool collection_detected;
+
 void weight_collect(void);
 void weight_scan(void);
 void print_weight_detection_status(void);

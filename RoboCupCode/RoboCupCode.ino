@@ -108,7 +108,7 @@ void task_init();
 
 void setup() {
   Serial.begin(BAUD_RATE);
-  ultrasonic_setup();
+  ultrasonic_setup();       
   tof_setup();
   //IMU_setup();
   colour_setup();
@@ -163,11 +163,11 @@ void task_init() {
 
 
 void loop() {
-  if (currentState == COLLECT) {
-      tRead_tof.disable();
-  } else {
-      tRead_tof.enable();
-  }
+  // if (currentState == COLLECT) {
+  //     tRead_tof.disable();
+  // } else {
+  //     tRead_tof.enable();
+  // }
   taskManager.execute();
   // ultrasonic_read();
   // tof_read();

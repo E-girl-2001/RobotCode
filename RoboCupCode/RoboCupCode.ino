@@ -108,7 +108,7 @@ void task_init();
 
 void setup() {
   Serial.begin(BAUD_RATE);
-  ultrasonic_setup();
+  ultrasonic_setup();       
   tof_setup();
   //IMU_setup();
   colour_setup();

@@ -82,13 +82,10 @@ void update_state() {
       weight_counter++;
       Serial.print(weight_counter);
       Serial.print("\n");
-
-
-      // if (weight_counter == 3) {
-      //   currentState = HOMING;
-      // } else {
-      //   currentState = SEARCH;
-      // }
+      // delay to wait until sensors are ready to be initialised again maybe
+      // Not sure else will just periodicaly check the sensors and if they are zero then reinit
+      // delay(1000);
+      // long_TOF_reinit();
       currentState = SEARCH;
       break;
 

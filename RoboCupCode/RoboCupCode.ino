@@ -148,13 +148,13 @@ void task_init() {
   // ---------- Enable the tasks ----------
   tRead_ultrasonic.enable();
   tRead_tof.enable();
-  tRead_Limit.enable();
+  //tRead_Limit.enable();
   tUpdate_state.enable();
   tSet_motor.enable();
   tWeight_scan.enable();
   tDetect_base.enable();
   //t_Activate_idle.enable();
-  //tRead_colour.enable();
+  //tRead_colour.enable();  
   //tSensor_average.enable();
   //tRead_IMU.enable();
   Serial.print("Tasks have been initialised\n");

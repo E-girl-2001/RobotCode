@@ -161,6 +161,34 @@ void tof_setup()
 }
 
 
+void long_TOF_reinit() {
+  // Disable/reset all sensors by driving their XSHUT pins low.
+  for (uint8_t i = 0; i < sensorCount_3; i++)
+    {
+      io.pinMode(xshutPins_3[i], OUTPUT);
+      io.digitalWrite(xshutPins_3[i], LOW);
+    }
+  // Enable, initialize, and start each sensor, one by one.
+  for (uint8_t i = 0; i < sensorCount_3; i++)
+  {
+    io.digitalWrite(xshutPins_3[i], HIGH);
+    delay(10);
+    sensors_1[i].setTimeout(500);
+    
+    if (!sensors_1[i].init())
+    {
+      Serial.print("Reinit Failed");
+      Serial.println(i);
+      while (1);
+    }
+
+    sensors_1[i].setAddress(VL53L1X_ADDRESS_START_3 + i);
+    sensors_1[i].startContinuous(50);
+
+  }
+}
+
+
 void pick_up_setup() {
   pinMode(magnet_pin, OUTPUT);   // Electromagnet setup
   pinMode(limit_pin, INPUT_PULLUP);
@@ -269,6 +297,8 @@ int low_filter(int new_val, char identifier) {
     return new_val;
   }
 }
+
+
 void tof_read(void)
 {
 

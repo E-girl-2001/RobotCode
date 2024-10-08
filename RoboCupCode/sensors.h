@@ -41,6 +41,8 @@ void print_tof();
 
 void print_ultrasonic();
 
+void long_TOF_reinit();
+
 //void read_limit_switch();
 
 // Read infrared value

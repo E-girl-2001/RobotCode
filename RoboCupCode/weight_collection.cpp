@@ -103,12 +103,5 @@ void weight_collect()
   //weight_counter++;
 }
 
-void drop_weight()
-{
-  control_servoB = ServoB_start + ServoB_travel_angle;
-  set_servo_bay(control_servoB);
-  delay(2000);
-  control_servoB = ServoB_start;
-  set_servo_bay(control_servoB);
-}
+
 

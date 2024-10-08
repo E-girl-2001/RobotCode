@@ -14,7 +14,7 @@
 #define ServoA_drop_angle 10
 
 #define ServoB_start 35
-#define ServoB_travel_angle 110
+#define ServoB_travel_angle 120
 
 
 // #define ServoB_start 145
@@ -45,5 +45,6 @@ void collect_drive();
 void homing_drive();
 void dropping();
 void ramp_drive();
+void drop_weight(void);
 
 #endif /* MOTORS_H_ */

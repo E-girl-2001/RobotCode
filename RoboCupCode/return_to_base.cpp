@@ -30,7 +30,9 @@ int blackBlueMin = 55, blackBlueMax = 75;
 
 // Variables to track home base color
 bool homeBaseIsGreen = false;
+bool enemyBaseIsGreen = false;
 bool homeBaseIsBlue = false;
+bool enemyBaseIsBlue = false;
 bool homeBaseDetected = false;
 bool leftHomeBase = false;
 bool isOnHomeBase= true;
@@ -112,10 +114,12 @@ void calibrateHomeBase() {
   // Check if starting on Green or Blue
   if (isGreen(clear, red, green, blue)) {
     homeBaseIsGreen = true;
+    enemyBaseIsBlue = true;
     homeBaseDetected = true;
     Serial.println("Home Base Detected as Green");
   } else if (isBlue(clear, red, green, blue)) {
     homeBaseIsBlue = true;
+    enemyBaseIsGreen = true;
     homeBaseDetected = true;
     Serial.println("Home Base Detected as Blue");
   } else {
@@ -147,13 +151,9 @@ void detect_base() {
     // If we leave the home base (but not on black floor), set the flag
     leftHomeBase = true;
     Serial.println("Left the home base.");
+    unload_weights();
   } 
-  // else if (isBlack(clear, red, green, blue)) {
-  //   Serial.println("Black floor detected. No action taken.");
-  // } 
-  // else {
-  //   Serial.println("No base detected.");
-  // }
+ 
 }
 
 // Return to home base
@@ -162,7 +162,7 @@ void return_to_base(/* Parameters */){
 }
 
 // Unload weights in home base
-void unload_weights(/* Parameters */){
+void unload_weights(){
   Serial.println("Unloading weights \n");
 }
 

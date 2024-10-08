@@ -46,5 +46,6 @@ void collect_drive();
 void homing_drive();
 void ramp_drive();
 void drop_weight(void);
+void reset_to_search();
 
 #endif /* MOTORS_H_ */

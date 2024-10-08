@@ -9,16 +9,19 @@
 Servo motorA, motorB, motorV;      // create servo object to control a servo
 Servo servoA, servoB;      // create servo object to control a servo
 
-#define MOTOR_FULL_FWD 1900
-#define MOTOR_FULL_REV 1100
+int MOTOR_FULL_FWD = 1900;
+int MOTOR_FULL_REV = 1100;
 #define MOTOR_STOP 1500 
 #define MOTOR_SLOW_FWD 1800
 #define MOTOR_SLOW_REV 1200
 #define MOTOR_TURN_FWD 1850
 #define MOTOR_TURN_REV 1150
 
+#define CRASH_TOL 10
+
 #define side_distance 20
 #define front_distance 20
+#define turn_tolerance 30
 
 #define TURN_TIMEOUT 8
 
@@ -35,6 +38,8 @@ int Kp = 2;
 
 int turn_timer = 0;
 bool released_the_massive_load = false;
+bool right_revving = false;
+bool left_revving = false;
 
 // Global variables to manage timing and state
 unsigned long dropStartTime = 0;
@@ -80,16 +85,36 @@ void idle_drive(){
   controlA = MOTOR_STOP;
   controlB = MOTOR_STOP;
 }
+void reset_to_search() {
+  left_detected = false;
+  right_detected = false;
+  detected = false;
+  adjust_right = false;
+  front_detected = false;
+  adjust_left = false;
+  collection_detected = false;
+  currentState = SEARCH;
+}
 
 void search_drive(){
-    if ((longHigh < front_distance) && ((R_sonic < L_sonic))) { // reverse right
+  if(collection_detected) {
+      MOTOR_FULL_FWD = MOTOR_SLOW_FWD;
+    if ((longHigh < front_distance) && ((R_sonic <= L_sonic) && ((R_sonic > turn_tolerance) || (!right_revving)))) { // reverse right
         Serial.print("REV RIGHT\n");
-            controlA = MOTOR_FULL_REV;
-            controlB = MOTOR_SLOW_FWD;
-        } else if ((longHigh < front_distance) && (L_sonic < R_sonic)) { // reverse left
+        right_revving = true;
+        controlA = MOTOR_FULL_REV;
+        controlB = MOTOR_SLOW_FWD;
+        if(R_sonic > turn_tolerance) {
+          right_revving = false;
+        }
+        } else if ((longHigh < front_distance) && (L_sonic < R_sonic) && ((L_sonic > turn_tolerance) || (!left_revving))) { // reverse left
         Serial.print("REV LEFT\n");
+        left_revving = true;
             controlA = MOTOR_SLOW_FWD;
             controlB = MOTOR_FULL_REV;
+        if(L_sonic > turn_tolerance) {
+          left_revving = false;
+        }
         }else if ((R_sonic < side_distance) || (shortHighRight < side_distance)) {  // turn right
             Serial.print("RIGHT\n");
             controlA = MOTOR_FULL_REV;
@@ -108,10 +133,16 @@ void search_drive(){
             controlB = MOTOR_FULL_FWD;
           }
         }
+  } else {
+    MOTOR_FULL_FWD = 1900;
+  }
 }
 
 void hunt_drive() {
-    
+    if (longLow <= (CRASH_TOL + 2) && longHigh <= CRASH_TOL && shortLeft <= CRASH_TOL &&  shortRight <= CRASH_TOL) {
+      reset_to_search();
+    }
+
     if (detected) {
         if (adjust_right) { //Hunting right
           Serial.print("BANG RIGHT");
@@ -131,9 +162,7 @@ void hunt_drive() {
     } else if (turn_timer > TURN_TIMEOUT) {
       Serial.print("TURN TIMEOUT");
         turn_timer = 0;
-        left_detected = false;
-        right_detected = false;
-        currentState = SEARCH;
+        reset_to_search();
     }
     else if (right_detected) {
         // turn right
@@ -156,7 +185,7 @@ void hunt_drive() {
     } else {
         // move forward
       turn_timer = 0;
-      currentState = SEARCH;
+      reset_to_search();
     }
 }
 

@@ -39,7 +39,7 @@ bool adjust_right = 0;
 bool adjust_left = 0;
 
 void weight_scan() {
-  if(longLow < (longHigh - long_detect_tolerance) && (longLow < max_front_detection)) {
+  if(longLow < (longHigh - long_detect_tolerance) && (longLow < max_front_detection) ) {
     detected = true;
     Serial.print("detected_front\n");
     left_detected = false;

@@ -188,7 +188,7 @@ void hunt_length_timer() {
 
 void activate_idle() {
     bool debounce = start_robot;
-    delay(50);
+    delay(100);
     //Serial.print("check\n");
     start_robot = analogRead(activateButton);
     if(start_robot && debounce && currentState == IDLE) {

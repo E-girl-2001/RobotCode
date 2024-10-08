@@ -40,10 +40,10 @@ void set_servo_bay(int control_servoB);
 void idle_drive();
 void search_drive();
 void hunt_drive();
+void fuckoff_drive();
 void scan_drive();
 void collect_drive();
 void homing_drive();
-void dropping();
 void ramp_drive();
 void drop_weight(void);
 

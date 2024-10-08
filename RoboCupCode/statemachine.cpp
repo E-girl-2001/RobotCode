@@ -58,7 +58,12 @@ void update_state() {
         // } else {
         //   hunt_length_time++;
         // }
-
+        if (isOnHomeBase){
+          fuckoff_drive();
+          delay(2000); //How long it spins for
+          currentState = SEARCH;
+        }
+          
         if (!detected && !left_detected && !right_detected) {
           currentState = SEARCH;
         }
@@ -78,7 +83,6 @@ void update_state() {
 
     case COLLECT:
       collect_drive();
-
       weight_collect();
       weight_counter++;
       Serial.print(weight_counter);
@@ -112,6 +116,7 @@ void update_state() {
           currentState = SEARCH;
         }
         break;
+
     case IDLE:
     // Handle the IDLE state
     activate_idle();

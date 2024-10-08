@@ -35,7 +35,8 @@ bool homeBaseIsBlue = false;
 bool enemyBaseIsBlue = false;
 bool homeBaseDetected = false;
 bool leftHomeBase = false;
-bool isOnHomeBase= true;
+bool isOnHomeBase = true;
+bool isOnEnemyBase = false;
 
 // Function to check if sensor is detecting a blue area
 bool isBlue(int clear, int red, int green, int blue) {
@@ -147,13 +148,18 @@ void detect_base() {
   isOnHomeBase = (homeBaseIsGreen && isGreen(clear, red, green, blue)) ||
                       (homeBaseIsBlue && isBlue(clear, red, green, blue));
 
+  isOnEnemyBase = (enemyBaseIsGreen && isGreen(clear, red, green, blue)) ||
+                      (enemyBaseIsBlue && isBlue(clear, red, green, blue));                    
+
   if (!isOnHomeBase && isBlack(clear, red, green, blue)) {
     // If we leave the home base (but not on black floor), set the flag
     leftHomeBase = true;
     Serial.println("Left the home base.");
-    unload_weights();
   } 
- 
+  else if (isOnHomeBase && leftHomeBase){
+    leftHomeBase = false;
+    drop_weight();
+  }
 }
 
 // Return to home base

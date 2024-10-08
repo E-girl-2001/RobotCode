@@ -8,7 +8,7 @@
 
 #include <Wire.h>
 #include <Adafruit_TCS34725.h>
-
+#include "motors.h"
 
 extern bool isOnHomeBase;
 extern bool leftHomeBase;

@@ -36,6 +36,13 @@ int Kp = 2;
 int turn_timer = 0;
 bool released_the_massive_load = false;
 
+// Global variables to manage timing and state
+unsigned long dropStartTime = 0;
+const int gateOpenTime = 5000;  // Gate remains open for 5 seconds
+const int motorDelay = 1000;  // Delay between motor direction changes
+bool isDroppingWeight = false;
+bool motorDirectionForward = true;
+unsigned long lastMotorChangeTime = 0;
 
 
 void motor_setup()
@@ -153,7 +160,10 @@ void hunt_drive() {
     }
 }
 
-
+void fuckoff_drive() {
+  motorA.writeMicroseconds(MOTOR_FULL_REV); 
+  motorB.writeMicroseconds(MOTOR_FULL_FWD);
+}
 
 void scan_drive() {
     controlA = MOTOR_SLOW_FWD;
@@ -243,36 +253,50 @@ void ramp_drive() {
   ramp = false;
 }
 
-void dropping() {
-    // Handle the DROPPING state
-  controlA = MOTOR_STOP;
-  controlB = MOTOR_STOP; 
-  released_the_massive_load = true;
-}
-
 void drop_weight()
 {
   control_servoB = ServoB_start + ServoB_travel_angle;
   set_servo_bay(control_servoB);
   Serial.print(control_servoB);
+
   motorA.writeMicroseconds(MOTOR_FULL_FWD);
   motorB.writeMicroseconds(MOTOR_FULL_FWD);
+  delay(500);
   motorA.writeMicroseconds(MOTOR_FULL_REV);
   motorB.writeMicroseconds(MOTOR_FULL_REV);
+  delay(500);
   motorA.writeMicroseconds(MOTOR_FULL_FWD);
   motorB.writeMicroseconds(MOTOR_FULL_FWD);
+  delay(500);
   motorA.writeMicroseconds(MOTOR_FULL_REV);
   motorB.writeMicroseconds(MOTOR_FULL_REV);
+  delay(500);
   motorA.writeMicroseconds(MOTOR_FULL_FWD);
   motorB.writeMicroseconds(MOTOR_FULL_FWD);
+  delay(500);
   motorA.writeMicroseconds(MOTOR_FULL_REV);
   motorB.writeMicroseconds(MOTOR_FULL_REV);
+  delay(500);
   motorA.writeMicroseconds(MOTOR_FULL_FWD);
   motorB.writeMicroseconds(MOTOR_FULL_FWD);
+  delay(500);
   motorA.writeMicroseconds(MOTOR_FULL_REV);
   motorB.writeMicroseconds(MOTOR_FULL_REV);
-  delay(10000);
+  delay(500);
+  motorA.writeMicroseconds(MOTOR_FULL_FWD);
+  motorB.writeMicroseconds(MOTOR_FULL_FWD);
+  delay(500);
+  motorA.writeMicroseconds(MOTOR_FULL_REV);
+  motorB.writeMicroseconds(MOTOR_FULL_REV);
+  delay(500);
+  motorA.writeMicroseconds(1500);
+  motorB.writeMicroseconds(1500);
+  
   control_servoB = ServoB_start;
   set_servo_bay(control_servoB);
   Serial.print(control_servoB);
+  released_the_massive_load = true;
 }
+
+
+

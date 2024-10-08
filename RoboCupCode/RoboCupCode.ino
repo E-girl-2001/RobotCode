@@ -43,7 +43,7 @@ bool debounce = 0;
 //**********************************************************************************
 #define US_READ_TASK_PERIOD                 40
 #define TOF_READ_TASK_PERIOD                20
-#define COLOUR_READ_TASK_PERIOD             40
+#define COLOUR_READ_TASK_PERIOD             60
 #define SET_MOTOR_TASK_PERIOD               40
 #define WEIGHT_SCAN_TASK_PERIOD             20
 #define DETECT_BASE_TASK_PERIOD             40
@@ -168,7 +168,9 @@ void loop() {
   // } else {
   //     tRead_tof.enable();
   // }
-  // taskManager.execute();
+  taskManager.execute();
   // ultrasonic_read();
   // tof_read();
+  // drop_weight();
+  // delay(4000);
 }

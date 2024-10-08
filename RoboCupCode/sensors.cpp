@@ -31,8 +31,8 @@ const byte SX1509_INTERRUPT_PIN = 2;
 
 const byte SX1509_ADDRESS = 0x3F;
 #define VL53L0X_ADDRESS_START_1 0x30
-#define VL53L0X_ADDRESS_START_2 0x35
-#define VL53L1X_ADDRESS_START_3 0x38
+#define VL53L0X_ADDRESS_START_2 0x36
+#define VL53L0X_ADDRESS_START_3 0x3A
 
 
 // The number of sensors in your system.
@@ -43,22 +43,27 @@ const uint8_t sensorCount_3 = 2;
 
 // The Arduino pin connected to the XSHUT pin of each sensor.
 const uint8_t xshutPins_1[8] = {0,1,2,3,4,5,6,7};
-const uint8_t xshutPins_2[8] = {4,5,6,7};
-const uint8_t xshutPins_3[8] = {6,7};
+const uint8_t xshutPins_3[8] = {4,5,6,7};
+const uint8_t xshutPins_2[8] = {6,7};
 
 uint8_t x_ROI = 16;
 uint8_t y_ROI = 16;
 
-int max_LTOF_range = 120;
+int max_LTOF_range = 60;
 int max_STOF_range = 60;
 
 SX1509 io; // Create an SX1509 object to be used throughout
 VL53L0X sensors_1[sensorCount_1];
 VL53L0X sensors_2[sensorCount_2];
-VL53L1X sensors_3[sensorCount_3];
+VL53L0X sensors_3[sensorCount_3];
 
 unsigned long lastDebounceTime = 0;   // For debouncing
 unsigned long debounceDelay = 50;     // Debounce delay (in ms)
+
+
+int longLow_reading, longHigh_reading, shortLeft_reading, shortRight_reading;
+int shortHighLeft_reading, shortHighRight_reading, shortLowLeft_reading, shortLowRight_reading;
+
 
 //SETUP
 //***********************************************************************
@@ -142,51 +147,57 @@ void tof_setup()
     delay(10);
     sensors_3[i].setTimeout(500);
     if (!sensors_3[i].init())
-    {
+    {\
       Serial.print("3: ");
       Serial.print("Failed to detect and initialize sensor ");
       Serial.println(i);
       while (1);
     }
-    sensors_3[i].setAddress(VL53L1X_ADDRESS_START_3 + i);
+    sensors_3[i].setAddress(VL53L0X_ADDRESS_START_3 + i);
     sensors_3[i].startContinuous(50);
 
-    sensors_3[i].setROISize(x_ROI, y_ROI);
-    delay(10);
-    sensors_3[i].setROICenter(199);
-    delay(10);
+    // sensors_3[i].setROISize(x_ROI, y_ROI);
+    // sensors_3[i].setROICenter(199);
+    // sensors_3[i].setDistanceMode(VL53L1X::Long);
+    // sensors_3[i].setMeasurementTimingBudget(250000);
+    // sensors_3[i].readRangeSingleMillimeters(false);
+
+
+    
+
   }
 
   Serial.print("TOF Setup\n");
 }
 
 
-void long_TOF_reinit() {
-  // Disable/reset all sensors by driving their XSHUT pins low.
-  for (uint8_t i = 0; i < sensorCount_3; i++)
-    {
-      io.pinMode(xshutPins_3[i], OUTPUT);
-      io.digitalWrite(xshutPins_3[i], LOW);
-    }
-  // Enable, initialize, and start each sensor, one by one.
-  for (uint8_t i = 0; i < sensorCount_3; i++)
-  {
-    io.digitalWrite(xshutPins_3[i], HIGH);
-    delay(10);
-    sensors_1[i].setTimeout(500);
-    
-    if (!sensors_1[i].init())
-    {
-      Serial.print("Reinit Failed");
-      Serial.println(i);
-      while (1);
-    }
+// void long_TOF_reinit() {
+//   // Disable/reset all sensors by driving their XSHUT pins low.
+//   for (uint8_t i = 0; i < sensorCount_3; i++)
+//     {
+//       io.pinMode(xshutPins_3[i], OUTPUT);
+//       io.digitalWrite(xshutPins_3[i], LOW);
+//     }
+//   // Enable, initialize, and start each sensor, one by one.
+//   for (uint8_t i = 0; i < sensorCount_3; i++)
+//   {
+//     io.digitalWrite(xshutPins_3[i], HIGH);
+//     delay(10);
+//     sensors_3[i].setTimeout(500);
+//     if (!sensors_3[i].init())
+//     {
+//       Serial.print("Reinit Failed");
+//       Serial.println(i);
+//       while (1);
+//     }
+//     sensors_3[i].setAddress(VL53L1X_ADDRESS_START_3 + i);
+//     sensors_3[i].startContinuous(50);
 
-    sensors_1[i].setAddress(VL53L1X_ADDRESS_START_3 + i);
-    sensors_1[i].startContinuous(50);
+//   }
+// }
 
-  }
-}
+
+
 
 
 void pick_up_setup() {
@@ -194,7 +205,7 @@ void pick_up_setup() {
   pinMode(limit_pin, INPUT_PULLUP);
 
   pinMode(inductor_pin, INPUT);  // Inductor sensor setup
-  attachInterrupt(digitalPinToInterrupt(inductor_pin), read_inductive, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(inductor_pin), read_inductive, FALLING);
 
   // Set up SX1509 communication
   // if (!io.begin(SX1509_ADDRESS)) {
@@ -267,6 +278,7 @@ int shortHighRight_buff[BUFFER_SIZE] = {0, 0, 0};
 int shortLowLeft_buff[BUFFER_SIZE] = {0, 0, 0};
 int shortLowRight_buff[BUFFER_SIZE] = {0, 0, 0};
 
+
 int average_filter(int* buffer, int new_val, char identifier) {
 
   // Shift values and add new reading to buffer
@@ -301,15 +313,32 @@ int low_filter(int new_val, char identifier) {
 
 void tof_read(void)
 {
+  
+  // if (sensors_3[0].dataReady())
+  // {
+  //   longLow_reading = sensors_3[0].read(false);
+  //   sensors_3[0].readRangeContinuousMillimeters(false);
+  // } else {
+  //   Serial.print("Long Low not ready\n");
+  //   // tof_setup();
+  // }
+  // if (sensors_3[1].dataReady()) {
+  //   longHigh_reading = sensors_3[1].read(false);
+  //   sensors_3[1].readRangeContinuousMillimeters(false);
+  // } else {
+  //   Serial.print("Long High not ready\n");
+  //   // tof_setup();
+  // }
 
-  int longLow_reading = sensors_3[0].readRangeContinuousMillimeters()/10;
-  int longHigh_reading = sensors_3[1].readRangeContinuousMillimeters()/10;
-  int shortLeft_reading = sensors_1[0].readRangeContinuousMillimeters()/10;
-  int shortRight_reading = sensors_1[1].readRangeContinuousMillimeters()/10;
-  int shortHighLeft_reading = sensors_1[2].readRangeContinuousMillimeters()/10;
-  int shortHighRight_reading = sensors_1[3].readRangeContinuousMillimeters()/10;
-  int shortLowLeft_reading = sensors_2[0].readRangeContinuousMillimeters()/10;
-  int shortLowRight_reading = sensors_2[1].readRangeContinuousMillimeters()/10;
+
+  longLow_reading = sensors_3[0].readRangeContinuousMillimeters()/10;
+  longHigh_reading = sensors_3[1].readRangeContinuousMillimeters()/10;
+  shortLeft_reading = sensors_1[0].readRangeContinuousMillimeters()/10;
+  shortRight_reading = sensors_1[1].readRangeContinuousMillimeters()/10;
+  shortHighLeft_reading = sensors_1[2].readRangeContinuousMillimeters()/10;
+  shortHighRight_reading = sensors_1[3].readRangeContinuousMillimeters()/10;
+  shortLowLeft_reading = sensors_2[0].readRangeContinuousMillimeters()/10;
+  shortLowRight_reading = sensors_2[1].readRangeContinuousMillimeters()/10;
 
   // Update buffers and get averaged values
 
@@ -380,9 +409,9 @@ void read_limit()
 
 void read_inductive()
 {
-  collect_drive();
+  // collect_drive();
   currentState = COLLECT;
-  delay(100);
+  // delay(100);
 }
 
 

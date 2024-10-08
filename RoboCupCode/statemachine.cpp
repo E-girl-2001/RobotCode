@@ -6,7 +6,7 @@
 
 #define SCAN_LENGTH 10
 #define SCAN_FREQUENCY 10
-#define HUNT_LENGTH 10
+#define HUNT_LENGTH 15
 #define VIBRATE_LENGTH 4
 
 // State Variables
@@ -29,6 +29,7 @@ void update_state() {
   //   Serial.print("Limit\n");
   //   currentState = COLLECT;
   // }
+
   print_state();
   switch (currentState) {
 
@@ -50,13 +51,13 @@ void update_state() {
         hunt_drive();
         // vibrate_length_timer();
         //Cancel out of HUNT after set period or if weight is detected
-        // if (hunt_length_time > 10) {
-        //   currentState = SEARCH;
-        //   hunt_length_time = 0;
+        if (hunt_length_time > HUNT_LENGTH) {
+          currentState = SEARCH;
+          hunt_length_time = 0;
 
-        // } else {
-        //   //hunt_length_time++;
-        // }
+        } else {
+          //hunt_length_time++;
+        }
 
         if (!detected && !left_detected && !right_detected) {
           currentState = SEARCH;
@@ -82,11 +83,8 @@ void update_state() {
       weight_counter++;
       Serial.print(weight_counter);
       Serial.print("\n");
-      // delay to wait until sensors are ready to be initialised again maybe
-      // Not sure else will just periodicaly check the sensors and if they are zero then reinit
-      // delay(1000);
-      // long_TOF_reinit();
       currentState = SEARCH;
+
       break;
 
     case RAMP:

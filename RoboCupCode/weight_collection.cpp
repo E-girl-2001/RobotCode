@@ -34,7 +34,7 @@ int detected_timeout = 10;
 void weight_scan() {
   if (currentState != IDLE) {
     // check all TOF sensors for weight
-    // if (longLow < (longHigh - ramp_tolerance) && shortLowLeft < (longHigh - ramp_tolerance) && shortLowRight < (longHigh - ramp_tolerance) && longLow < 15) {
+    // if (longLow < (longHigh - ramp_tolerance) && shortLowLeft < (longHigh - ramp_tolerance) && shortLowRight < (longHigh - ramp_tolerance) && longLow < 30 && longLow > 10) {
     //   currentState = RAMP;
     if (longLow < (longHigh - long_detect_tolerance) && (longLow < max_front_detection)) {
       detected = true;
@@ -97,7 +97,7 @@ void weight_collect()
   digitalWrite(magnet_pin, LOW);
   control_servoA = ServoA_start;
   set_servo_mag(control_servoA);
-  delay(1000);
+  delay(2000);
 
   // Increment weight counter
   //weight_counter++;

@@ -20,7 +20,7 @@ Servo servoA, servoB;      // create servo object to control a servo
 #define side_distance 14
 #define front_distance 20
 
-#define TURN_TIMEOUT 15
+#define TURN_TIMEOUT 10
 #define HUNT_TIMEOIUT 5
 
 int controlA = MOTOR_STOP; // control signal for motor A
@@ -47,6 +47,7 @@ void motor_setup()
   servoA.attach(1);
   servoB.attach(0);
   servoA.write(ServoA_start);
+  servoB.write(ServoB_start);
   Serial.print("Motor Setup");
 } 
 

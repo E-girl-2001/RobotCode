@@ -12,9 +12,9 @@
 // #define VL53L0X_ADDRESS_START 0x30
 // #define VL53L1X_ADDRESS_START 0x35
 
-const int inductor_pin = 27;
+const int inductor_pin = 14;
 const int magnet_pin = 24;
-const int limit_pin = 14;
+const int limit_pin = 27;
 
 extern long shortLeft, shortRight, shortHighLeft, shortHighRight, shortLowLeft, shortLowRight, longHigh, longLow;
 extern int L_sonic, R_sonic;
@@ -35,7 +35,7 @@ void update_flags();
 
 void read_limit();
 
-bool read_inductive();
+void read_inductive();
 
 void print_tof();
 

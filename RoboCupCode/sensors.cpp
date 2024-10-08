@@ -8,6 +8,7 @@
 #include "sensors.h"
 #include "Arduino.h"
 #include "statemachine.h"
+#include "motors.h"
 #include <VL53L0X.h>
 #include <VL53L1X.h>
 #include <Wire.h>
@@ -161,9 +162,11 @@ void tof_setup()
 
 
 void pick_up_setup() {
-  pinMode(inductor_pin, INPUT);  // Inductor sensor setup
   pinMode(magnet_pin, OUTPUT);   // Electromagnet setup
   pinMode(limit_pin, INPUT_PULLUP);
+
+  pinMode(inductor_pin, INPUT);  // Inductor sensor setup
+  attachInterrupt(digitalPinToInterrupt(inductor_pin), read_inductive, CHANGE);
 
   // Set up SX1509 communication
   // if (!io.begin(SX1509_ADDRESS)) {
@@ -345,50 +348,11 @@ void read_limit()
 
 
 
-bool read_inductive()
+void read_inductive()
 {
-  bool inductive = digitalRead(inductor_pin);
-  return inductive;
+  collect_drive();
+  currentState = COLLECT;
+  delay(100);
 }
 
-//STATES
-//***********************************************************************
 
-// void update_flags()
-// {
-//   if((L_sonic < side_distance) && (!R_flag)) {
-//     L_flag = 1;
-//   } else if (L_sonic > 8) {
-//     L_flag = 0;
-//   }
-
-//   if((R_sonic < side_distance) && (!L_flag)) {
-//     R_flag = 1;
-//   } else if (R_sonic > 8) {
-//     R_flag = 0;
-//   }
-
-//   if(longHigh < front_distance) {
-//     if (L_sonic < R_sonic) {
-//       BL_flag = 1;
-//     } else {
-//       BR_flag = 1;
-//     }
-//   } else if(longHigh > 12 && BL_flag == 1 && L_sonic > 10) {
-//     BL_flag = 0;
-//   } else if(longHigh > 12 && BR_flag == 1 && R_sonic > 10) {
-//     BR_flag = 0;
-//   }
-
-//   if(shortLeft > longLow && shortLeft > shortRight) {
-//     HR_flag = 1;
-//   } else {
-//     HR_flag = 0;
-//   }
-
-//   if(shortRight > longLow && shortRight > shortLeft) {
-//     HL_flag = 1;
-//   } else {
-//     HL_flag = 0;
-//   }
-// }

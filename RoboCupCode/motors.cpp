@@ -82,7 +82,7 @@ void idle_drive(){
 }
 
 void search_drive(){
-    if ((longHigh < front_distance) && (R_sonic < L_sonic)) { // reverse right
+    if ((longHigh < front_distance) && ((R_sonic < L_sonic))) { // reverse right
         Serial.print("REV RIGHT\n");
             controlA = MOTOR_FULL_REV;
             controlB = MOTOR_SLOW_FWD;
@@ -90,11 +90,11 @@ void search_drive(){
         Serial.print("REV LEFT\n");
             controlA = MOTOR_SLOW_FWD;
             controlB = MOTOR_FULL_REV;
-        }else if ((R_sonic < side_distance)) {  // turn right
+        }else if ((R_sonic < side_distance) || (shortHighRight < side_distance)) {  // turn right
             Serial.print("RIGHT\n");
             controlA = MOTOR_FULL_REV;
             controlB = MOTOR_FULL_FWD;
-        } else if ((L_sonic < side_distance)) { // turn left
+        } else if ((L_sonic < side_distance)|| (shortHighLeft < side_distance)) { // turn left
             Serial.print("LEFT\n");
             controlA = MOTOR_FULL_FWD;
             controlB = MOTOR_FULL_REV;

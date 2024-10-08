@@ -19,6 +19,7 @@ Servo servoA, servoB;      // create servo object to control a servo
 
 #define side_distance 20
 #define front_distance 20
+#define turn_tolerance 30
 
 #define TURN_TIMEOUT 8
 
@@ -31,6 +32,9 @@ int control_servoB = ServoB_start;
 int currentA = controlA;
 int currentB = controlB;
 int Kp = 2;
+
+bool revving_right = 0;
+bool revving_left = 0;
 
 
 int turn_timer = 0;
@@ -75,19 +79,27 @@ void idle_drive(){
 }
 
 void search_drive(){
-    if ((longHigh < front_distance) && (R_sonic < L_sonic)) { // reverse right
-        Serial.print("REV RIGHT\n");
+    if ((longHigh < front_distance) && (R_sonic < L_sonic) && ((L_sonic > turn_tolerance) || (!revving_right))) { // reverse right
+        //Serial.print("REV RIGHT\n");
+          revving_right = true;
             controlA = MOTOR_FULL_REV;
             controlB = MOTOR_SLOW_FWD;
-        } else if ((longHigh < front_distance) && (L_sonic < R_sonic)) { // reverse left
-        Serial.print("REV LEFT\n");
-            controlA = MOTOR_SLOW_FWD;
-            controlB = MOTOR_FULL_REV;
-        }else if ((R_sonic < side_distance)) {  // turn right
+        if(R_sonic > turn_tolerance) {
+          revving_right = false;
+        }
+        } else if ((longHigh < front_distance) && (L_sonic <= R_sonic) &&((L_sonic > turn_tolerance) || (!revving_left))) { // reverse left
+          //Serial.print("REV LEFT\n");
+          revving_left = true;
+          controlA = MOTOR_SLOW_FWD;
+          controlB = MOTOR_FULL_REV;
+          if(L_sonic > turn_tolerance) {
+            revving_right = false;
+          }
+        }else if ((R_sonic < side_distance) || shortLowRight < side_distance) {  // turn right
             Serial.print("RIGHT\n");
             controlA = MOTOR_FULL_REV;
             controlB = MOTOR_FULL_FWD;
-        } else if ((L_sonic < side_distance)) { // turn left
+        } else if ((L_sonic < side_distance) || shortLowLeft < side_distance) { // turn left
             Serial.print("LEFT\n");
             controlA = MOTOR_FULL_FWD;
             controlB = MOTOR_FULL_REV;

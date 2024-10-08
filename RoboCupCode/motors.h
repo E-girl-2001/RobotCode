@@ -10,10 +10,10 @@
 #define MAX_SPEED_CAP 1
 
 #define ServoA_start 142
-#define ServoA_lift_angle 85
+#define ServoA_lift_angle 90
 #define ServoA_drop_angle 10
 
-#define ServoB_start 35
+#define ServoB_start 30
 #define ServoB_travel_angle 110
 
 

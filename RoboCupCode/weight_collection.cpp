@@ -55,13 +55,13 @@ void weight_scan() {
       adjust_left = false;
       collection_detected = true;
     } else if((shortRight < longLow) && (shortRight < shortLeft) && shortRight < max_front_detection && shortRight > 10 && R_sonic > 10) {
-      adjust_right = true;
+      adjust_right = false;
       front_detected = false;
       adjust_left = false;
     } else if(shortLeft < longLow && (shortLeft < shortRight) && shortLeft < max_front_detection && shortLeft > 10 && L_sonic > 10) {
       adjust_right = false;
       front_detected = false;
-      adjust_left = true;
+      adjust_left = false;
     } else if(longLow < (longHigh - long_detect_tolerance) && (longLow < max_front_detection) && longHigh > 10) {
       adjust_right = false;
       front_detected = true;

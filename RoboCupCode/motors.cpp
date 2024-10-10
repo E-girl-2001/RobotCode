@@ -129,8 +129,8 @@ void hunt_drive() {
           controlB = MOTOR_FULL_FWD;
 
         } else { //Hunting forward
-          controlA = MOTOR_FULL_FWD;
-          controlB = MOTOR_FULL_FWD;
+          controlA = MOTOR_TURN_FWD;
+          controlB = MOTOR_TURN_FWD;
 
         }
     } else if (turn_timer > TURN_TIMEOUT) {

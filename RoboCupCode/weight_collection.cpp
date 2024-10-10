@@ -47,7 +47,7 @@ void weight_scan() {
   }
 
   if(detected) {
-    if(longLow < (longHigh - long_detect_tolerance) && longLow < (shortLeft - long_detect_tolerance) && longLow < (shortRight - long_detect_tolerance) && longLow < 3) {
+    if(longLow < (longHigh - long_detect_tolerance) && longLow < (shortLeft - long_detect_tolerance) && longLow < (shortRight - long_detect_tolerance) && longLow < 10) {
       Serial.print("COLLECTION\n");
       detected = false;
       adjust_right = false;
